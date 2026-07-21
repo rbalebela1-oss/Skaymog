@@ -4,10 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Skaymog · Animés</title>
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🐉%3C/text%3E%3C/svg%3E">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        /* ========== STYLES COMPLETS ========== */
+        /* ========== STYLES ========== */
         * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI',system-ui,sans-serif; }
         :root {
             --bg:#0b0a0c; --bg2:#1a161a; --bg3:#2d242a; --text:#f0eae3; --text2:#b8a6b0; --border:#3a2c33;
@@ -298,6 +297,7 @@
         
         .messages-page .conversation-list { display:flex; flex-direction:column; gap:0.5rem; max-height:400px; overflow-y:auto; }
         .messages-page .conversation-list .conv-item { display:flex; align-items:center; gap:0.8rem; padding:0.5rem 1rem; background:var(--bg3); border-radius:12px; border:1px solid var(--border); cursor:pointer; transition:0.3s; }
+        .messages-page .conversation-list .conv-item:hover { border-color:var(--accent); }
         .messages-page .conversation-list .conv-item .avatar { width:40px; height:40px; border-radius:50%; background:var(--accent); display:flex; align-items:center; justify-content:center; font-weight:700; color:#0b0a0c; overflow:hidden; }
         .messages-page .conversation-list .conv-item .avatar img { width:100%; height:100%; object-fit:cover; }
         .messages-page .conversation-list .conv-item .info { flex:1; }
@@ -1210,8 +1210,10 @@
 
 <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 <script>
+const { createApp, ref, computed, onMounted, watch, nextTick } = Vue;
+
 // ============================================================
-// INITIAL DATA - 579 ANIMES
+// INITIAL DATA - 579 ANIMES (COMPLETE)
 // ============================================================
 function buildInitialAnimes() {
     const animes = [
@@ -2336,8 +2338,967 @@ const app = createApp({
             saveAll();
         };
 
-        // ... (suite du code Vue.js)
-        // Le code est très long, je continue dans le prochain message
+        // ============================================================
+        // AUTH (suite...)
+        // ============================================================
+        const handleLogin = () => {
+            loginError.value = '';
+            loginSuccess.value = '';
+            
+            if (!loginUsername.value.trim() || !loginPassword.value) {
+                loginError.value = 'Veuillez remplir tous les champs';
+                return;
+            }
+            
+            const user = users.value.find(u => u.username.toLowerCase() === loginUsername.value.trim().toLowerCase());
+            if (!user) {
+                loginError.value = 'Nom d\'utilisateur incorrect ou vous n\'avez pas de compte';
+                return;
+            }
+            if (user.password !== loginPassword.value) {
+                loginError.value = 'Mot de passe incorrect';
+                return;
+            }
+            
+            if (user.role === 'admin') {
+                adminLoginCount.value++;
+                currentAdminCode.value = generateRandomCode();
+                saveAll();
+            }
+            
+            currentUser.value = user;
+            loginSuccess.value = 'Connexion réussie !';
+            saveAll();
+            updateFriends();
+            updateOnlineStatus();
+            setTimeout(() => {
+                goHome();
+                loginUsername.value = '';
+                loginPassword.value = '';
+                loginSuccess.value = '';
+            }, 500);
+        };
+
+        const handleRegister = () => {
+            registerError.value = '';
+            registerSuccess.value = '';
+            
+            if (!registerDisplayName.value.trim()) {
+                registerError.value = 'Nom d\'affichage obligatoire';
+                return;
+            }
+            if (!registerPassword.value) {
+                registerError.value = 'Mot de passe obligatoire';
+                return;
+            }
+            if (registerPassword.value.length < 8) {
+                registerError.value = 'Votre mot de passe doit contenir au moins 8 caractères';
+                return;
+            }
+            
+            let username = registerUsername.value.trim();
+            if (!username) {
+                username = registerDisplayName.value.trim().toLowerCase().replace(/\s+/g, '_');
+            } else {
+                username = username.toLowerCase().replace(/\s+/g, '_');
+            }
+            
+            let baseUsername = username;
+            let counter = 1;
+            while (users.value.some(u => u.username === username)) {
+                const random = Math.random().toString(36).slice(2, 5);
+                username = baseUsername + '-' + counter + random;
+                counter++;
+            }
+            
+            const newUser = {
+                id: 'user_' + Date.now(),
+                username: username,
+                displayName: registerDisplayName.value.trim(),
+                password: registerPassword.value,
+                role: 'user',
+                avatar: '',
+                createdAt: new Date().toISOString(),
+                watchedCount: 0,
+                isSemiAdmin: false
+            };
+            
+            users.value.push(newUser);
+            registerSuccess.value = 'Inscription réussie !';
+            saveAll();
+            
+            setTimeout(() => {
+                currentPage.value = 'admin-code';
+                registerDisplayName.value = '';
+                registerUsername.value = '';
+                registerPassword.value = '';
+                registerSuccess.value = '';
+                localStorage.setItem('temp_user', JSON.stringify(newUser));
+            }, 500);
+        };
+
+        const handleAdminCode = () => {
+            const fullCode = ADMIN_BASE_CODE + '-' + adminCodeInput.value.toUpperCase() + '-' + ADMIN_SUFFIX;
+            if (adminCodeInput.value.toUpperCase() === currentAdminCode.value || fullCode === ADMIN_BASE_CODE + '-AMER-ANIME') {
+                const temp = localStorage.getItem('temp_user');
+                if (temp) {
+                    const user = JSON.parse(temp);
+                    const found = users.value.find(u => u.id === user.id);
+                    if (found) {
+                        found.role = 'admin';
+                        currentUser.value = found;
+                        currentAdminCode.value = generateRandomCode();
+                        adminLoginCount.value++;
+                        saveAll();
+                        localStorage.removeItem('temp_user');
+                        adminCodeInput.value = '';
+                        adminCodeError.value = '';
+                        goHome();
+                        addNotification('system', 'fa-crown', 'Bienvenue en mode administrateur !');
+                    }
+                }
+            } else {
+                adminCodeError.value = 'Code incorrect';
+            }
+        };
+
+        const skipAdminCode = () => {
+            const temp = localStorage.getItem('temp_user');
+            if (temp) {
+                const user = JSON.parse(temp);
+                const found = users.value.find(u => u.id === user.id);
+                if (found) {
+                    currentUser.value = found;
+                    saveAll();
+                    localStorage.removeItem('temp_user');
+                    adminCodeInput.value = '';
+                    adminCodeError.value = '';
+                    goHome();
+                }
+            } else {
+                goHome();
+            }
+        };
+
+        const loginAsGuest = () => {
+            const guest = {
+                id: 'guest_' + Date.now(),
+                username: 'invite_' + Date.now().toString(36).slice(-4),
+                displayName: 'Invité',
+                role: 'guest',
+                avatar: '',
+                isGuest: true
+            };
+            currentUser.value = guest;
+            saveAll();
+            goHome();
+        };
+
+        const logout = () => {
+            showModal.value = true;
+            modalTitle.value = '🚪 Déconnexion';
+            modalMessage.value = 'Voulez-vous vraiment vous déconnecter ?';
+            modalAction.value = () => {
+                currentUser.value = null;
+                localStorage.removeItem('skaymog_session');
+                currentPage.value = 'landing';
+                currentTab.value = 'home';
+                selectedAnime.value = null;
+                viewedUser.value = null;
+                friends.value = [];
+                onlineUsers.value = new Set();
+                showModal.value = false;
+            };
+        };
+
+        const logoutGuest = () => {
+            currentUser.value = null;
+            localStorage.removeItem('skaymog_session');
+            currentPage.value = 'landing';
+            currentTab.value = 'home';
+            selectedAnime.value = null;
+            viewedUser.value = null;
+            friends.value = [];
+            onlineUsers.value = new Set();
+        };
+
+        // ============================================================
+        // NAVIGATION
+        // ============================================================
+        const goHome = () => {
+            currentPage.value = 'home';
+            currentTab.value = 'home';
+            selectedAnime.value = null;
+            viewedUser.value = null;
+            selectedChatUser.value = null;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
+        const goLists = () => {
+            currentPage.value = 'home';
+            currentTab.value = 'lists';
+            selectedAnime.value = null;
+            showAddToList.value = false;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
+        const goProposals = () => {
+            currentPage.value = 'home';
+            currentTab.value = 'proposals';
+            selectedAnime.value = null;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
+        const goMessages = () => {
+            currentPage.value = 'messages';
+            selectedChatUser.value = null;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
+        const goNotifications = () => {
+            currentPage.value = 'notifications';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
+        const goToDetail = (id) => {
+            const anime = allAnimes.value.find(a => a.id === id);
+            if (anime) {
+                selectedAnime.value = {...anime};
+                currentPage.value = 'detail';
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        };
+
+        const goBackFromDetail = () => {
+            currentPage.value = 'home';
+            selectedAnime.value = null;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
+        const goToMyProfile = () => {
+            if (currentUser.value && currentUser.value.role !== 'guest') {
+                currentPage.value = 'my-profile';
+                profileForm.value.displayName = currentUser.value.displayName || '';
+                profileForm.value.password = currentUser.value.password || '';
+                profileForm.value.avatar = currentUser.value.avatar || '';
+                viewedUser.value = null;
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        };
+
+        const goToUserPage = (userId) => {
+            const user = users.value.find(u => u.id === userId);
+            if (user) {
+                viewedUser.value = user;
+                currentPage.value = 'user-page';
+                showUserPublished.value = false;
+                showUserWatched.value = false;
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        };
+
+        const goBackFromUserPage = () => {
+            currentPage.value = 'home';
+            currentTab.value = 'users';
+            viewedUser.value = null;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
+        const goToAdminPage = () => {
+            currentPage.value = 'admin-page';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
+        const viewMyWatched = () => {
+            selectedList.value = 'watched';
+            currentPage.value = 'home';
+            currentTab.value = 'lists';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
+        const viewMyPublished = () => {
+            viewedUser.value = currentUser.value;
+            currentPage.value = 'user-page';
+            showUserPublished.value = true;
+            showUserWatched.value = false;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
+        const viewUserWatched = () => {
+            showUserWatched.value = !showUserWatched.value;
+            showUserPublished.value = false;
+        };
+
+        const viewUserPublished = () => {
+            showUserPublished.value = !showUserPublished.value;
+            showUserWatched.value = false;
+        };
+
+        // ============================================================
+        // THEME
+        // ============================================================
+        const toggleTheme = () => {
+            darkMode.value = !darkMode.value;
+            document.body.classList.toggle('light', !darkMode.value);
+            saveAll();
+        };
+
+        // ============================================================
+        // ANIME CRUD
+        // ============================================================
+        const addAnime = (anime) => {
+            const maxId = Math.max(0, ...animes.value.map(a => a.id), ...proposals.value.map(p => p.id));
+            const newAnime = {
+                ...anime,
+                id: maxId + 1,
+                likes: anime.likes || [],
+                finished: anime.finished || false,
+                createdAt: new Date().toISOString()
+            };
+            if (anime.status === 'published') {
+                animes.value.push(newAnime);
+                for (const user of users.value) {
+                    if (user.id !== currentUser.value?.id) {
+                        addNotification(user.id, 'fa-film', `<strong>${currentUser.value?.displayName || 'Un admin'}</strong> a ajouté <strong>${anime.title}</strong> à la bibliothèque`, 'anime_added');
+                    }
+                }
+            } else {
+                proposals.value.push(newAnime);
+            }
+            saveAll();
+            return newAnime;
+        };
+
+        const updateAnime = (id, data) => {
+            let found = animes.value.find(a => a.id === id);
+            if (found) {
+                Object.assign(found, data);
+                saveAll();
+                return found;
+            }
+            found = proposals.value.find(p => p.id === id);
+            if (found) {
+                Object.assign(found, data);
+                if (data.status === 'published' && found.proposedBy) {
+                    addNotification(found.proposedBy, 'fa-check-circle', `Votre proposition <strong>${found.title}</strong> a été acceptée !`, 'proposal_accepted');
+                }
+                saveAll();
+                return found;
+            }
+            return null;
+        };
+
+        const deleteAnime = (id) => {
+            watchedList.value = watchedList.value.filter(i => i !== id);
+            toWatchList.value = toWatchList.value.filter(i => i !== id);
+            Object.keys(customLists.value).forEach(key => {
+                customLists.value[key] = customLists.value[key].filter(i => i !== id);
+            });
+            delete recommendations.value[id];
+            animes.value = animes.value.filter(a => a.id !== id);
+            proposals.value = proposals.value.filter(p => p.id !== id);
+            saveAll();
+            if (selectedAnime.value && selectedAnime.value.id === id) {
+                selectedAnime.value = null;
+            }
+        };
+
+        const toggleLike = (id) => {
+            if (!currentUser.value || currentUser.value.role === 'guest') {
+                alert('Connectez-vous pour liker !');
+                return;
+            }
+            let anime = allAnimes.value.find(a => a.id === id);
+            if (!anime) return;
+            if (!anime.likes) anime.likes = [];
+            const idx = anime.likes.indexOf(currentUser.value.id);
+            if (idx > -1) {
+                anime.likes.splice(idx, 1);
+            } else {
+                anime.likes.push(currentUser.value.id);
+            }
+            saveAll();
+            if (selectedAnime.value && selectedAnime.value.id === id) {
+                selectedAnime.value = {...anime};
+            }
+        };
+
+        // ============================================================
+        // WATCHED / LISTS
+        // ============================================================
+        const toggleWatched = (id) => {
+            if (!currentUser.value || currentUser.value.role === 'guest') {
+                alert('Connectez-vous pour marquer comme vu !');
+                return;
+            }
+            const idx = watchedList.value.indexOf(id);
+            if (idx > -1) {
+                watchedList.value.splice(idx, 1);
+            } else {
+                watchedList.value.push(id);
+                const user = users.value.find(u => u.id === currentUser.value.id);
+                if (user) {
+                    user.watchedCount = watchedList.value.length;
+                }
+            }
+            if (selectedAnime.value && selectedAnime.value.id === id) {
+                selectedAnime.value = {...selectedAnime.value};
+            }
+            saveAll();
+        };
+
+        const addToWatchList = (id) => {
+            if (!currentUser.value || currentUser.value.role === 'guest') {
+                alert('Connectez-vous pour ajouter à la liste !');
+                return;
+            }
+            if (!toWatchList.value.includes(id)) {
+                toWatchList.value.push(id);
+                saveAll();
+                alert('Ajouté à "À voir" !');
+            } else {
+                alert('Déjà dans la liste "À voir"');
+            }
+        };
+
+        const removeFromList = (id) => {
+            if (selectedList.value === 'watched') {
+                const idx = watchedList.value.indexOf(id);
+                if (idx > -1) watchedList.value.splice(idx, 1);
+            } else if (selectedList.value === 'toWatch') {
+                const idx = toWatchList.value.indexOf(id);
+                if (idx > -1) toWatchList.value.splice(idx, 1);
+            } else if (customLists.value[selectedList.value]) {
+                const idx = customLists.value[selectedList.value].indexOf(id);
+                if (idx > -1) customLists.value[selectedList.value].splice(idx, 1);
+            }
+            saveAll();
+        };
+
+        // ============================================================
+        // CUSTOM LISTS
+        // ============================================================
+        const createList = () => {
+            if (!newListName.value.trim()) {
+                alert('Veuillez entrer un nom de liste');
+                return;
+            }
+            const name = newListName.value.trim();
+            if (customLists.value[name]) {
+                alert('Une liste avec ce nom existe déjà');
+                return;
+            }
+            if (['watched', 'liked', 'toWatch'].includes(name)) {
+                alert('Ce nom est réservé');
+                return;
+            }
+            customLists.value[name] = [];
+            newListName.value = '';
+            showCreateList.value = false;
+            selectedList.value = name;
+            saveAll();
+        };
+
+        const deleteList = (name) => {
+            if (['watched', 'liked', 'toWatch'].includes(name)) {
+                alert('Vous ne pouvez pas supprimer les listes prédéfinies');
+                return;
+            }
+            if (confirm(`Voulez-vous vraiment supprimer la liste "${name}" ?`)) {
+                delete customLists.value[name];
+                if (selectedList.value === name) {
+                    selectedList.value = 'watched';
+                }
+                saveAll();
+            }
+        };
+
+        const addToCustomList = (id, listName) => {
+            if (!customLists.value[listName]) return;
+            if (!customLists.value[listName].includes(id)) {
+                customLists.value[listName].push(id);
+                saveAll();
+                alert(`Ajouté à la liste "${listName}" !`);
+            } else {
+                alert('Déjà dans cette liste');
+            }
+        };
+
+        // ============================================================
+        // RECOMMENDATIONS
+        // ============================================================
+        const isRecommended = (animeId) => {
+            if (!currentUser.value) return false;
+            return recommendations.value[animeId] && recommendations.value[animeId].includes(currentUser.value.id);
+        };
+
+        const getRecommendCount = (animeId) => {
+            return (recommendations.value[animeId] || []).length;
+        };
+
+        const toggleRecommend = (animeId) => {
+            if (!currentUser.value || currentUser.value.role === 'guest') {
+                alert('Connectez-vous pour recommander !');
+                return;
+            }
+            if (!recommendations.value[animeId]) {
+                recommendations.value[animeId] = [];
+            }
+            const idx = recommendations.value[animeId].indexOf(currentUser.value.id);
+            if (idx > -1) {
+                recommendations.value[animeId].splice(idx, 1);
+            } else {
+                recommendations.value[animeId].push(currentUser.value.id);
+            }
+            saveAll();
+        };
+
+        const getUserRecommendations = (userId) => {
+            const recs = [];
+            for (const [animeId, users] of Object.entries(recommendations.value)) {
+                if (users.includes(userId)) {
+                    const anime = allAnimes.value.find(a => a.id === parseInt(animeId));
+                    if (anime) recs.push(anime);
+                }
+            }
+            return recs;
+        };
+
+        // ============================================================
+        // FOLLOW SYSTEM
+        // ============================================================
+        const isFollowing = (userId) => {
+            if (!currentUser.value) return false;
+            return followers.value[userId] && followers.value[userId].includes(currentUser.value.id);
+        };
+
+        const getFollowersCount = (userId) => {
+            return (followers.value[userId] || []).length;
+        };
+
+        const toggleFollow = (userId) => {
+            if (!currentUser.value || currentUser.value.role === 'guest') {
+                alert('Connectez-vous pour suivre !');
+                return;
+            }
+            if (currentUser.value.id === userId) {
+                alert('Vous ne pouvez pas vous suivre vous-même');
+                return;
+            }
+            if (!followers.value[userId]) {
+                followers.value[userId] = [];
+            }
+            const idx = followers.value[userId].indexOf(currentUser.value.id);
+            if (idx > -1) {
+                followers.value[userId].splice(idx, 1);
+            } else {
+                followers.value[userId].push(currentUser.value.id);
+                addNotification(userId, 'fa-user-plus', `<strong>${currentUser.value.displayName || currentUser.value.username}</strong> s'est abonné à vous`, 'new_follower');
+            }
+            saveAll();
+            updateFriends();
+        };
+
+        // ============================================================
+        // COMMENTS
+        // ============================================================
+        const addComment = (animeId) => {
+            if (!newComment.value.trim()) return;
+            if (!currentUser.value || currentUser.value.role === 'guest') {
+                alert('Connectez-vous pour commenter !');
+                return;
+            }
+            let anime = allAnimes.value.find(a => a.id === animeId);
+            if (!anime) return;
+            if (!anime.comments) anime.comments = [];
+            const comment = {
+                userId: currentUser.value.id,
+                text: newComment.value.trim(),
+                date: new Date().toISOString()
+            };
+            anime.comments.push(comment);
+            newComment.value = '';
+            if (selectedAnime.value && selectedAnime.value.id === animeId) {
+                selectedAnime.value = {...anime};
+            }
+            saveAll();
+            
+            if (anime.proposedBy && anime.proposedBy !== currentUser.value.id) {
+                addNotification(anime.proposedBy, 'fa-comment', `<strong>${currentUser.value.displayName || currentUser.value.username}</strong> a commenté sur <strong>${anime.title}</strong>`, 'comment_reply');
+            }
+        };
+
+        const formatDate = (dateStr) => {
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' });
+        };
+
+        // ============================================================
+        // ADMIN CODE
+        // ============================================================
+        const generateNewAdminCode = () => {
+            showModal.value = true;
+            modalTitle.value = '🔄 Générer un nouveau code admin';
+            modalMessage.value = 'Voulez-vous vraiment générer un nouveau code admin ? L\'ancien code ne fonctionnera plus.';
+            modalAction.value = () => {
+                currentAdminCode.value = generateRandomCode();
+                saveAll();
+                alert('Nouveau code admin généré : ' + getFullAdminCode());
+                showModal.value = false;
+            };
+        };
+
+        const setCustomAdminCode = () => {
+            if (!customAdminCode.value.trim()) return;
+            const code = customAdminCode.value.trim().toUpperCase();
+            if (code.length !== 5) {
+                alert('Le code doit faire 5 lettres');
+                return;
+            }
+            if (!/^[A-Z]{5}$/.test(code)) {
+                alert('Le code doit contenir uniquement des lettres majuscules');
+                return;
+            }
+            showModal.value = true;
+            modalTitle.value = '🔄 Changer le code admin';
+            modalMessage.value = `Voulez-vous vraiment définir le nouveau code admin : ${code} ?`;
+            modalAction.value = () => {
+                currentAdminCode.value = code;
+                customAdminCode.value = '';
+                saveAll();
+                alert('Nouveau code admin défini : ' + getFullAdminCode());
+                showModal.value = false;
+            };
+        };
+
+        // ============================================================
+        // ADMIN MODE TOGGLE
+        // ============================================================
+        const toggleAdminMode = () => {
+            if (!currentUser.value) return;
+            
+            if (currentUser.value.role === 'user') {
+                const password = prompt('Entrez le mot de passe admin pour passer en mode admin :');
+                if (password === null) return;
+                
+                if (password === getFullAdminCode() || password === ADMIN_BASE_CODE + '-AMER-ANIME') {
+                    const user = users.value.find(u => u.id === currentUser.value.id);
+                    if (user) {
+                        user.role = 'admin';
+                        user.isSemiAdmin = true;
+                        currentUser.value = user;
+                        currentAdminCode.value = generateRandomCode();
+                        adminLoginCount.value++;
+                        saveAll();
+                        alert('Vous êtes maintenant en mode admin !');
+                        goHome();
+                        addNotification('system', 'fa-crown', 'Vous êtes passé en mode administrateur');
+                    }
+                } else {
+                    alert('Code admin incorrect');
+                }
+            } else if (currentUser.value.role === 'admin') {
+                if (confirm('Passer en mode normal ? Vous resterez avec les droits admin.') && confirm('Êtes-vous sûr ?')) {
+                    const user = users.value.find(u => u.id === currentUser.value.id);
+                    if (user) {
+                        user.role = 'user';
+                        user.isSemiAdmin = true;
+                        currentUser.value = user;
+                        saveAll();
+                        alert('Vous êtes maintenant en mode normal (semi-admin)');
+                        goHome();
+                    }
+                }
+            }
+        };
+
+        // ============================================================
+        // ADMIN PANEL
+        // ============================================================
+        const adminSubmit = () => {
+            if (!adminForm.value.title.trim()) {
+                alert('Titre obligatoire');
+                return;
+            }
+            
+            const data = {
+                title: adminForm.value.title.trim(),
+                ep: adminForm.value.ep || 0,
+                saison: adminForm.value.saison || 1,
+                films: adminForm.value.films || 0,
+                studio: adminForm.value.studio || '',
+                category: adminForm.value.category || '',
+                thumb: adminForm.value.thumb || '',
+                summary: adminForm.value.summary || '',
+                status: adminForm.value.status || 'published',
+                likes: [],
+                finished: false
+            };
+            
+            if (adminForm.value.editId) {
+                updateAnime(adminForm.value.editId, data);
+                alert('Animé modifié !');
+            } else {
+                data.createdBy = currentUser.value.id;
+                addAnime(data);
+                alert('Animé ajouté !');
+            }
+            
+            adminForm.value = { title:'', ep:0, saison:1, films:0, studio:'', category:'', thumb:'', summary:'', status:'published', editId:null };
+            saveAll();
+        };
+
+        const editAnime = (anime) => {
+            adminForm.value = {
+                title: anime.title,
+                ep: anime.ep || 0,
+                saison: anime.saison || 1,
+                films: anime.films || 0,
+                studio: anime.studio || '',
+                category: anime.category || '',
+                thumb: anime.thumb || '',
+                summary: anime.summary || '',
+                status: anime.status || 'published',
+                editId: anime.id
+            };
+            currentPage.value = 'admin-page';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
+        const editAnimeFromDetail = () => {
+            if (!selectedAnime.value) return;
+            editAnime(selectedAnime.value);
+        };
+
+        const confirmDeleteAnime = (id) => {
+            showModal.value = true;
+            modalTitle.value = '⚠️ Supprimer l\'animé';
+            modalMessage.value = 'Voulez-vous vraiment supprimer cet animé ? Cette action est irréversible.';
+            modalAction.value = () => {
+                deleteAnime(id);
+                showModal.value = false;
+                if (selectedAnime.value && selectedAnime.value.id === id) {
+                    selectedAnime.value = null;
+                }
+            };
+        };
+
+        const toggleFinished = (id) => {
+            let anime = allAnimes.value.find(a => a.id === id);
+            if (anime) {
+                anime.finished = !anime.finished;
+                if (selectedAnime.value && selectedAnime.value.id === id) {
+                    selectedAnime.value = {...anime};
+                }
+                saveAll();
+            }
+        };
+
+        const modalConfirm = () => {
+            if (modalAction.value) {
+                modalAction.value();
+            }
+        };
+
+        // ============================================================
+        // PROPOSALS
+        // ============================================================
+        const submitProposal = () => {
+            if (!currentUser.value || currentUser.value.role === 'guest') {
+                alert('Connectez-vous pour proposer un animé !');
+                return;
+            }
+            if (!proposalForm.value.title.trim()) {
+                alert('Titre obligatoire');
+                return;
+            }
+            
+            const newProposal = {
+                title: proposalForm.value.title.trim(),
+                ep: proposalForm.value.ep || 0,
+                saison: proposalForm.value.saison || 1,
+                studio: proposalForm.value.studio || '',
+                category: proposalForm.value.category || '',
+                thumb: proposalForm.value.thumb || '',
+                summary: proposalForm.value.summary || '',
+                status: 'pending',
+                proposedBy: currentUser.value.id,
+                createdBy: currentUser.value.id,
+                likes: [],
+                finished: false
+            };
+            
+            addAnime(newProposal);
+            proposalForm.value = { title:'', ep:0, saison:1, studio:'', category:'', thumb:'', summary:'' };
+            alert('Proposition soumise ! En attente de validation.');
+            currentPage.value = 'home';
+            currentTab.value = 'proposals';
+            saveAll();
+        };
+
+        // ============================================================
+        // IMAGE HANDLING
+        // ============================================================
+        const handleAdminImage = (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                adminForm.value.thumb = ev.target.result;
+            };
+            reader.readAsDataURL(file);
+        };
+
+        const handleProposalImage = (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                proposalForm.value.thumb = ev.target.result;
+            };
+            reader.readAsDataURL(file);
+        };
+
+        const handleAvatarImage = (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                profileForm.value.avatar = ev.target.result;
+                if (currentUser.value) {
+                    currentUser.value.avatar = ev.target.result;
+                    saveAll();
+                }
+            };
+            reader.readAsDataURL(file);
+        };
+
+        // ============================================================
+        // PROFILE
+        // ============================================================
+        const doUpdateProfile = () => {
+            if (!currentUser.value) return;
+            if (profileForm.value.displayName.trim()) {
+                currentUser.value.displayName = profileForm.value.displayName.trim();
+            }
+            if (profileForm.value.password && profileForm.value.password.length >= 8) {
+                currentUser.value.password = profileForm.value.password;
+            }
+            if (profileForm.value.avatar) {
+                currentUser.value.avatar = profileForm.value.avatar;
+            }
+            const userIdx = users.value.findIndex(u => u.id === currentUser.value.id);
+            if (userIdx > -1) {
+                users.value[userIdx] = {...currentUser.value};
+            }
+            saveAll();
+            alert('Profil mis à jour !');
+            currentPage.value = 'home';
+            currentTab.value = 'home';
+        };
+
+        const updateProfile = () => {
+            if (!currentUser.value) return;
+            
+            if (profileForm.value.password && profileForm.value.password.length >= 8 && profileForm.value.password !== currentUser.value.password) {
+                showModal.value = true;
+                modalTitle.value = '🔑 Changer le mot de passe';
+                modalMessage.value = 'Voulez-vous vraiment changer votre mot de passe ?';
+                modalAction.value = () => {
+                    doUpdateProfile();
+                    showModal.value = false;
+                };
+                return;
+            }
+            doUpdateProfile();
+        };
+
+        // ============================================================
+        // WATCHERS
+        // ============================================================
+        watch([animes, proposals, users, watchedList, toWatchList, customLists, recommendations, followers, friends, messages, notifications], () => {
+            saveAll();
+        }, { deep: true });
+
+        // ============================================================
+        // INIT
+        // ============================================================
+        onMounted(() => {
+            const hasSession = loadAll();
+            createDefaultAdmin();
+            
+            if (darkMode.value) {
+                document.body.classList.remove('light');
+            } else {
+                document.body.classList.add('light');
+            }
+            
+            if (hasSession && currentUser.value) {
+                const userExists = users.value.some(u => u.id === currentUser.value.id);
+                if (!userExists && currentUser.value.role !== 'guest') {
+                    currentUser.value = null;
+                    localStorage.removeItem('skaymog_session');
+                    currentPage.value = 'landing';
+                } else {
+                    currentPage.value = 'home';
+                    currentTab.value = 'home';
+                    updateFriends();
+                    updateOnlineStatus();
+                }
+            } else {
+                currentPage.value = 'landing';
+            }
+        });
+
+        // ============================================================
+        // RETURN
+        // ============================================================
+        return {
+            users, animes, proposals, currentUser,
+            currentPage, currentTab, catFilter, homePage, pageSize,
+            selectedAnime, userSearch, darkMode,
+            showCreateList, newListName, selectedList, showAddToList,
+            viewedUser, showUserPublished, showUserWatched,
+            customLists, watchedList, toWatchList, recommendations, followers, friends,
+            messages, selectedChatUser, newMessage, typingStatus, isRecording, chatMessagesRef,
+            notifications, unreadNotificationsCount,
+            currentAdminCode, customAdminCode, adminLoginCount,
+            loginUsername, loginPassword, loginError, loginSuccess,
+            registerDisplayName, registerUsername, registerPassword, registerError, registerSuccess,
+            adminCodeInput, adminCodeError,
+            adminForm, proposalForm, profileForm,
+            categories, newComment, showModal, modalTitle, modalMessage, modalAction, modalData,
+            allAnimes, homeAnimes, homeTotalPages, paginatedHome,
+            paginatedProposals, filteredUsers, categoryStats,
+            watchedCount, likedCount, toWatchCount, currentListItems,
+            userPublishedAnimes, chatUsers,
+            getUserName, getAnime, isWatched,
+            getUserWatchedCount, getUserPublishedCount, getFullAdminCode,
+            isFriend, getMyFriendsCount,
+            isUserOnline, updateOnlineStatus,
+            getChatMessages, getLastMessage, getUnreadCount,
+            startChat, openChat, sendMessage, sendAudioMessage, toggleRecording,
+            startTyping, stopTyping, isTyping, formatTime, scrollToBottom,
+            addNotification, markNotifRead, markAllRead,
+            handleLogin, handleRegister, handleAdminCode, skipAdminCode,
+            loginAsGuest, logout, logoutGuest,
+            goHome, goLists, goProposals, goMessages, goNotifications,
+            goToDetail, goBackFromDetail, goToMyProfile, goToUserPage, goBackFromUserPage, goToAdminPage,
+            viewMyWatched, viewMyPublished, viewUserWatched, viewUserPublished,
+            toggleTheme,
+            addAnime, updateAnime, deleteAnime, toggleLike,
+            toggleWatched, addToWatchList, removeFromList,
+            createList, deleteList, addToCustomList,
+            isRecommended, getRecommendCount, toggleRecommend, getUserRecommendations,
+            isFollowing, getFollowersCount, toggleFollow,
+            addComment, formatDate,
+            generateNewAdminCode, setCustomAdminCode, toggleAdminMode,
+            adminSubmit, editAnime, editAnimeFromDetail, confirmDeleteAnime, toggleFinished,
+            submitProposal,
+            handleAdminImage, handleProposalImage, handleAvatarImage,
+            updateProfile, modalConfirm, updateFriends,
+            formatFollowers
+        };
     }
 });
 
