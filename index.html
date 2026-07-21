@@ -8,25 +8,34 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-    <script>
-        //  REMPLACE PAR TA CONFIG FIREBASE (récupérée depuis firebase.google.com)
-        const firebaseConfig = {
-            apiKey: "AIzaSyCFeRsGMlDn688IT7_N_G02t4hH1mXJol8",
-            authDomain: "skaymog.firebaseapp.com",
-            projectId: "skaymog",
-            storageBucket: "skaymog.firebasestorage.app",
-            messagingSenderId: "760326549194",
-            appId: "1:760326549194:web:bc51c2e693c4cc1ed6ce33"
-            measurementId: "G-QX927JNZ82"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-        window.db = db;
-        // Chemin du document unique qui stocke tout l'état de l'application
-        const STATE_PATH = 'skaymog/appData';
-    </script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script>
+    // ============================================================
+    // CONFIGURATION FIREBASE - SKAYMOG
+    // ============================================================
+    const firebaseConfig = {
+        apiKey: "AIzaSyCFeRsGMlDn688IT7_N_G02t4hH1mXJol8",
+        authDomain: "skaymog.firebaseapp.com",
+        projectId: "skaymog",
+        storageBucket: "skaymog.firebasestorage.app",
+        messagingSenderId: "760326549194",
+        appId: "1:760326549194:web:bc51c2e693c4cc1ed6ce33",
+        measurementId: "G-QX927JNZ82"
+    };
+
+    // Initialisation de Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    // Rendre db accessible dans la console pour les tests
+    window.db = db;
+
+    // Chemin du document unique qui stocke tout l'état de l'application
+    const STATE_PATH = 'skaymog/appData';
+
+    console.log('✅ Firebase Firestore connecté !');
+</script>
     
     <style>
         /* ========== STYLES COMPLETS ========== */
