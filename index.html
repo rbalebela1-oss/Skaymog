@@ -3,10 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Skaymog ¬∑ Anim√©s</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <title>Skaymog ∑ AnimÈs</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%3C/text%3E%3C/svg%3E">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script>
+        //  REMPLACE PAR TA CONFIG FIREBASE (rÈcupÈrÈe depuis firebase.google.com)
+        const firebaseConfig = {
+            apiKey: "TA_CLE_API",
+            authDomain: "ton-projet.firebaseapp.com",
+            projectId: "ton-projet",
+            storageBucket: "ton-projet.appspot.com",
+            messagingSenderId: "ton-id",
+            appId: "ton-app-id"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        window.db = db;
+        // Chemin du document unique qui stocke tout l'Ètat de l'application
+        const STATE_PATH = 'skaymog/appData';
+    </script>
+    
     <style>
-        /* ========== STYLES ========== */
+        /* ========== STYLES COMPLETS ========== */
         * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI',system-ui,sans-serif; }
         :root {
             --bg:#0b0a0c; --bg2:#1a161a; --bg3:#2d242a; --text:#f0eae3; --text2:#b8a6b0; --border:#3a2c33;
@@ -18,7 +40,6 @@
         
         .container { max-width:1400px; margin:0 auto; padding:1rem; }
         
-        /* ========== HEADER ========== */
         .header {
             display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between;
             padding:0.8rem 1.5rem; background:var(--bg2); border-radius:40px;
@@ -59,7 +80,6 @@
         .btn-online { background:var(--green); border:none; color:#fff; padding:0.1rem 0.5rem; border-radius:20px; font-size:0.6rem; cursor:default; }
         .btn-offline { background:var(--text2); border:none; color:var(--bg); padding:0.1rem 0.5rem; border-radius:20px; font-size:0.6rem; cursor:default; }
         
-        /* ========== LANDING ========== */
         .landing {
             display:flex; flex-direction:column; align-items:center; justify-content:center;
             min-height:80vh; text-align:center; padding:2rem;
@@ -71,7 +91,6 @@
         .landing .feature-icons .feature { text-align:center; color:var(--text2); }
         .landing .feature-icons .feature i { font-size:2.5rem; color:var(--accent); margin-bottom:0.5rem; display:block; }
         
-        /* ========== AUTH ========== */
         .auth-page {
             max-width:420px; margin:2rem auto; background:var(--bg2); padding:2.5rem; border-radius:var(--radius); border:1px solid var(--border); box-shadow:var(--shadow);
         }
@@ -95,7 +114,6 @@
         .admin-code-page input:focus { border-color:var(--accent2); }
         .admin-code-page .buttons { display:flex; gap:1rem; justify-content:center; flex-wrap:wrap; }
         
-        /* ========== NAV ========== */
         .nav {
             display:flex; flex-wrap:wrap; gap:0.3rem; margin-bottom:1.5rem; border-bottom:2px solid var(--border); padding:0.4rem 0;
         }
@@ -105,13 +123,11 @@
         .nav-item .badge { background:var(--accent); color:#0b0a0c; font-size:0.6rem; padding:0.05rem 0.5rem; border-radius:20px; margin-left:4px; }
         .nav-item .notif-dot { position:absolute; top:4px; right:4px; width:10px; height:10px; background:var(--red); border-radius:50%; border:2px solid var(--bg2); }
         
-        /* ========== CATS ========== */
         .cats { display:flex; flex-wrap:wrap; gap:0.4rem 0.8rem; margin-bottom:1.5rem; }
         .cat { background:var(--bg2); padding:0.3rem 1.2rem; border-radius:30px; font-size:0.85rem; border:1px solid var(--border); cursor:pointer; color:var(--text2); }
         .cat:hover { border-color:var(--accent); }
         .cat.active { background:var(--accent); color:#0b0a0c; border-color:var(--accent); }
         
-        /* ========== GRID ========== */
         .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:1.5rem; margin:1.5rem 0; }
         .card {
             background:var(--bg2); border-radius:var(--radius); padding:0.8rem; border:1px solid var(--border);
@@ -138,13 +154,11 @@
         .card .actions .btn-watched.watched { background:var(--green); border-color:var(--green); color:#fff; }
         .card .actions .btn-watched:hover { border-color:var(--accent); }
         
-        /* ========== PAGES ========== */
         .pages { display:flex; justify-content:center; align-items:center; gap:1.5rem; margin:1.5rem 0; }
         .pages button { background:var(--bg2); border:1px solid var(--border); color:var(--text); padding:0.3rem 1.2rem; border-radius:40px; font-weight:600; cursor:pointer; }
         .pages button:hover:not(:disabled) { border-color:var(--accent); background:var(--bg3); }
         .pages button:disabled { opacity:0.4; cursor:not-allowed; }
         
-        /* ========== DETAIL PAGE ========== */
         .detail-page { background:var(--bg2); border-radius:var(--radius); padding:2rem; border:1px solid var(--border); margin:1.5rem 0; }
         .detail-page .detail-header { display:flex; gap:2rem; flex-wrap:wrap; }
         .detail-page .detail-thumb { flex:0 0 250px; aspect-ratio:16/10; background:var(--bg3); border-radius:14px; overflow:hidden; border:1px solid var(--border); }
@@ -159,7 +173,6 @@
         .detail-page .detail-info .summary p { color:var(--text2); font-size:0.9rem; line-height:1.6; }
         .detail-page .detail-actions { display:flex; gap:0.8rem; margin-top:1rem; flex-wrap:wrap; }
         
-        /* ========== COMMENTS ========== */
         .comments-section {
             margin-top:1.5rem; background:var(--bg3); border-radius:12px; padding:1rem; border:1px solid var(--border);
         }
@@ -173,18 +186,15 @@
         .comments-section .comment-form input { flex:1; min-width:150px; background:var(--bg2); border:1px solid var(--border); padding:0.5rem 1rem; border-radius:40px; color:var(--text); outline:none; }
         .comments-section .comment-form input:focus { border-color:var(--accent); }
         
-        /* ========== RECOMMEND ========== */
         .recommend-btn { background:transparent; border:1px solid var(--accent2); color:var(--accent2); padding:0.3rem 1rem; border-radius:40px; cursor:pointer; font-size:0.8rem; display:inline-flex; align-items:center; gap:6px; }
         .recommend-btn:hover { background:var(--accent2); color:#0b0a0c; }
         .recommend-btn.recommended { background:var(--accent2); color:#0b0a0c; }
         
-        /* ========== FOLLOW ========== */
         .follow-btn { background:var(--bg3); border:1px solid var(--border); color:var(--text); padding:0.3rem 1.2rem; border-radius:40px; cursor:pointer; font-size:0.8rem; font-weight:600; transition:0.3s; }
         .follow-btn:hover { border-color:var(--accent); }
         .follow-btn.following { background:var(--accent); border-color:var(--accent); color:#0b0a0c; }
         .follow-btn.following:hover { background:var(--red); border-color:var(--red); color:#fff; }
         
-        /* ========== MODAL ========== */
         .modal-overlay {
             position:fixed; top:0; left:0; right:0; bottom:0;
             background:rgba(0,0,0,0.7); display:flex; align-items:center; justify-content:center;
@@ -196,7 +206,6 @@
         .modal-overlay .modal .buttons { display:flex; gap:0.8rem; justify-content:center; flex-wrap:wrap; }
         @keyframes fadeIn { from { opacity:0; transform:scale(0.9); } to { opacity:1; transform:scale(1); } }
         
-        /* ========== LISTS ========== */
         .lists-page { background:var(--bg2); border-radius:var(--radius); padding:1.5rem; border:1px solid var(--border); margin:1.5rem 0; }
         .lists-page .list-header { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.8rem; margin-bottom:1rem; }
         .lists-page .list-tabs { display:flex; flex-wrap:wrap; gap:0.5rem; margin-bottom:1rem; }
@@ -215,7 +224,6 @@
         .lists-page .list-content .list-item .remove-btn { background:transparent; border:none; color:var(--red); cursor:pointer; font-size:0.8rem; }
         .lists-page .list-content .list-item .remove-btn:hover { transform:scale(1.2); }
         
-        /* ========== PROFILE ========== */
         .profile-page { max-width:700px; margin:1.5rem auto; background:var(--bg2); padding:2rem; border-radius:var(--radius); border:1px solid var(--border); }
         .profile-page .profile-header { display:flex; align-items:center; gap:2rem; flex-wrap:wrap; margin-bottom:1.5rem; }
         .profile-page .profile-header .avatar { width:100px; height:100px; border-radius:50%; background:var(--accent); display:flex; align-items:center; justify-content:center; font-size:2.5rem; font-weight:700; color:#0b0a0c; overflow:hidden; border:3px solid var(--accent); }
@@ -234,7 +242,6 @@
         .profile-page .profile-form input:focus { border-color:var(--accent); }
         .profile-page .profile-form .admin-code-display { background:var(--bg3); padding:0.5rem 1rem; border-radius:40px; border:1px solid var(--accent2); text-align:center; font-family:monospace; font-size:1.1rem; color:var(--accent2); margin:0.5rem 0; }
         
-        /* ========== USER PAGE ========== */
         .user-page { max-width:700px; margin:1.5rem auto; background:var(--bg2); padding:2rem; border-radius:var(--radius); border:1px solid var(--border); }
         .user-page .user-header { display:flex; align-items:center; gap:2rem; flex-wrap:wrap; margin-bottom:1.5rem; }
         .user-page .user-header .avatar { width:80px; height:80px; border-radius:50%; background:var(--accent); display:flex; align-items:center; justify-content:center; font-size:2rem; font-weight:700; color:#0b0a0c; overflow:hidden; border:3px solid var(--accent); }
@@ -248,7 +255,6 @@
         .user-page .user-stats .stat .label { font-size:0.8rem; color:var(--text2); }
         .user-page .user-stats .stat .sub-label { font-size:0.65rem; color:var(--text2); display:block; }
         
-        /* ========== RECOMMENDATIONS GRID ========== */
         .recommendations-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:1rem; margin-top:1rem; }
         .recommendations-grid .rec-card { background:var(--bg3); border-radius:12px; padding:0.5rem; border:1px solid var(--border); cursor:pointer; transition:0.3s; }
         .recommendations-grid .rec-card:hover { border-color:var(--accent2); transform:translateY(-2px); }
@@ -256,18 +262,15 @@
         .recommendations-grid .rec-card .thumb img { width:100%; height:100%; object-fit:cover; }
         .recommendations-grid .rec-card .title { font-size:0.8rem; font-weight:600; }
         
-        /* ========== THEME TOGGLE ========== */
         .theme-toggle { background:var(--bg3); border:1px solid var(--border); border-radius:40px; padding:0.2rem 0.8rem; cursor:pointer; color:var(--text); display:flex; align-items:center; gap:6px; font-size:0.8rem; }
         .theme-toggle:hover { border-color:var(--accent); }
         
-        /* ========== FOOTER ========== */
         .footer { text-align:center; margin-top:2rem; color:var(--text2); font-size:0.8rem; border-top:1px solid var(--border); padding-top:1.2rem; }
         .footer .brand { color:var(--accent); font-weight:700; }
         .footer .footer-links { display:flex; justify-content:center; gap:1.5rem; flex-wrap:wrap; margin-bottom:0.5rem; }
         .footer .footer-links a { color:var(--text2); text-decoration:none; font-size:0.8rem; transition:color 0.3s; }
         .footer .footer-links a:hover { color:var(--accent); }
         
-        /* ========== ADMIN PANEL ========== */
         .admin-panel-page { background:var(--bg2); border-radius:var(--radius); padding:1.5rem; border:1px solid var(--border); margin-top:1.5rem; border-top:3px solid var(--accent); }
         .admin-panel-page h2 { color:var(--accent); margin-bottom:1rem; display:flex; align-items:center; gap:10px; }
         .admin-form { display:flex; flex-wrap:wrap; gap:0.8rem 1.2rem; align-items:flex-end; }
@@ -278,7 +281,6 @@
         .admin-form input:focus, .admin-form select:focus { border-color:var(--accent); }
         .admin-form .file-input { padding:0.3rem; border-radius:12px; background:var(--bg3); border:1px solid var(--border); }
         
-        /* ========== USER LIST ITEM ========== */
         .user-list-item { display:flex; align-items:center; gap:1rem; padding:0.6rem 1rem; background:var(--bg3); border-radius:12px; border:1px solid var(--border); cursor:pointer; transition:0.3s; }
         .user-list-item:hover { border-color:var(--accent); }
         .user-list-item .avatar { width:40px; height:40px; border-radius:50%; background:var(--accent); display:flex; align-items:center; justify-content:center; font-weight:700; color:#0b0a0c; overflow:hidden; }
@@ -290,14 +292,12 @@
         .user-list-item .followers-count { font-size:0.7rem; color:var(--text2); display:flex; align-items:center; gap:4px; }
         .user-list-item .followers-count i { color:var(--accent); }
         
-        /* ========== MESSAGERIE ========== */
         .messages-page { background:var(--bg2); border-radius:var(--radius); padding:1.5rem; border:1px solid var(--border); margin:1.5rem 0; }
         .messages-page .messages-header { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.8rem; margin-bottom:1rem; }
         .messages-page .messages-header h2 { color:var(--accent); }
         
         .messages-page .conversation-list { display:flex; flex-direction:column; gap:0.5rem; max-height:400px; overflow-y:auto; }
         .messages-page .conversation-list .conv-item { display:flex; align-items:center; gap:0.8rem; padding:0.5rem 1rem; background:var(--bg3); border-radius:12px; border:1px solid var(--border); cursor:pointer; transition:0.3s; }
-        .messages-page .conversation-list .conv-item:hover { border-color:var(--accent); }
         .messages-page .conversation-list .conv-item .avatar { width:40px; height:40px; border-radius:50%; background:var(--accent); display:flex; align-items:center; justify-content:center; font-weight:700; color:#0b0a0c; overflow:hidden; }
         .messages-page .conversation-list .conv-item .avatar img { width:100%; height:100%; object-fit:cover; }
         .messages-page .conversation-list .conv-item .info { flex:1; }
@@ -331,7 +331,6 @@
         .messages-page .chat-box .chat-input .audio-btn.recording { background:var(--red); color:#fff; animation:pulse 1s infinite; }
         @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.5;} }
         
-        /* ========== NOTIFICATIONS ========== */
         .notifications-page { background:var(--bg2); border-radius:var(--radius); padding:1.5rem; border:1px solid var(--border); margin:1.5rem 0; }
         .notifications-page .notif-item { display:flex; align-items:center; gap:0.8rem; padding:0.5rem 1rem; background:var(--bg3); border-radius:12px; border:1px solid var(--border); margin-bottom:0.5rem; transition:0.3s; }
         .notifications-page .notif-item:hover { border-color:var(--accent); }
@@ -344,7 +343,6 @@
         .notifications-page .notif-item.unread { border-left:3px solid var(--accent); }
         .notifications-page .notif-empty { text-align:center; padding:2rem; color:var(--text2); }
         
-        /* ========== LICENCE PAGE ========== */
         .licence-page {
             max-width:800px; margin:2rem auto; background:var(--bg2); padding:2.5rem; border-radius:var(--radius); border:1px solid var(--border); box-shadow:var(--shadow);
         }
@@ -360,7 +358,6 @@
         .licence-page .footer-licence { margin-top:2rem; padding-top:1rem; border-top:1px solid var(--border); text-align:center; color:var(--text2); font-size:0.8rem; }
         .licence-page .footer-licence .brand { color:var(--accent); font-weight:700; }
         
-        /* ========== RESPONSIVE ========== */
         @media (max-width:700px) {
             .header{flex-direction:column;align-items:stretch;}
             .header-right{justify-content:center;}
@@ -418,7 +415,7 @@
                     </div>
                     <span class="username">{{ currentUser ? (currentUser.displayName || currentUser.username) : '' }}</span>
                     <span class="role-badge" v-if="currentUser && currentUser.role === 'admin'">Admin</span>
-                    <span class="role-badge guest" v-else-if="currentUser && currentUser.role === 'guest'">Invit√©</span>
+                    <span class="role-badge guest" v-else-if="currentUser && currentUser.role === 'guest'">InvitÈ</span>
                     <span class="notif-badge" v-if="unreadNotificationsCount > 0">{{ unreadNotificationsCount }}</span>
                 </div>
                 
@@ -437,7 +434,7 @@
                 </button>
                 
                 <button class="btn btn-sm" @click="logout" v-if="currentUser && currentUser.role !== 'guest'">
-                    <i class="fas fa-sign-out-alt"></i> D√©connexion
+                    <i class="fas fa-sign-out-alt"></i> DÈconnexion
                 </button>
                 <button class="btn btn-sm" @click="logoutGuest" v-if="currentUser && currentUser.role === 'guest'">
                     <i class="fas fa-sign-out-alt"></i> Quitter
@@ -461,16 +458,16 @@
         <div v-if="currentPage === 'landing'" class="landing">
             <i class="fas fa-dragon" style="font-size:5rem;color:var(--accent);margin-bottom:1rem;"></i>
             <h1>Skaymog</h1>
-            <p>Votre biblioth√®que d'anim√©s pr√©f√©r√©e. D√©couvrez, partagez et g√©rez vos s√©ries favorites.</p>
+            <p>Votre bibliothËque d'animÈs prÈfÈrÈe. DÈcouvrez, partagez et gÈrez vos sÈries favorites.</p>
             <div class="buttons">
                 <button class="btn btn-primary btn-lg" @click="currentPage='login'"><i class="fas fa-sign-in-alt"></i> Connexion</button>
                 <button class="btn btn-secondary btn-lg" @click="currentPage='register'"><i class="fas fa-user-plus"></i> Inscription</button>
-                <button class="btn btn-guest btn-lg" @click="loginAsGuest"><i class="fas fa-user-secret"></i> Invit√©</button>
+                <button class="btn btn-guest btn-lg" @click="loginAsGuest"><i class="fas fa-user-secret"></i> InvitÈ</button>
             </div>
             <div class="feature-icons">
-                <div class="feature"><i class="fas fa-film"></i><span>{{ allAnimes.length }} anim√©s</span></div>
+                <div class="feature"><i class="fas fa-film"></i><span>{{ allAnimes.length }} animÈs</span></div>
                 <div class="feature"><i class="fas fa-users"></i><span>{{ users.length }} utilisateurs</span></div>
-                <div class="feature"><i class="fas fa-heart"></i><span>Likes en temps r√©el</span></div>
+                <div class="feature"><i class="fas fa-heart"></i><span>Likes en temps rÈel</span></div>
                 <div class="feature"><i class="fas fa-comment-dots"></i><span>Messagerie</span></div>
             </div>
         </div>
@@ -478,7 +475,7 @@
         <!-- ========== LOGIN ========== -->
         <div v-else-if="currentPage === 'login'" class="auth-page">
             <h2><i class="fas fa-sign-in-alt"></i> Connexion</h2>
-            <p class="subtitle">Connectez-vous √† votre compte</p>
+            <p class="subtitle">Connectez-vous ‡ votre compte</p>
             <div class="field">
                 <label><i class="fas fa-user"></i> Nom d'utilisateur</label>
                 <input v-model="loginUsername" placeholder="Entrez votre nom d'utilisateur" @keydown.enter="handleLogin">
@@ -497,34 +494,34 @@
         <!-- ========== REGISTER ========== -->
         <div v-else-if="currentPage === 'register'" class="auth-page">
             <h2><i class="fas fa-user-plus"></i> Inscription</h2>
-            <p class="subtitle">Cr√©ez votre compte Skaymog</p>
+            <p class="subtitle">CrÈez votre compte Skaymog</p>
             <div class="field">
                 <label><i class="fas fa-user-tag"></i> Nom d'affichage *</label>
-                <input v-model="registerDisplayName" placeholder="Comment voulez-vous √™tre appel√© ?" @keydown.enter="handleRegister">
+                <input v-model="registerDisplayName" placeholder="Comment voulez-vous Ítre appelÈ ?" @keydown.enter="handleRegister">
             </div>
             <div class="field">
                 <label><i class="fas fa-user"></i> Nom d'utilisateur</label>
                 <input v-model="registerUsername" placeholder="Laissez vide pour utiliser votre nom" @keydown.enter="handleRegister">
                 <div style="font-size:0.75rem;color:var(--text2);margin-top:4px;">
-                    <i class="fas fa-info-circle"></i> Si vide, votre nom d'affichage sera utilis√©
+                    <i class="fas fa-info-circle"></i> Si vide, votre nom d'affichage sera utilisÈ
                 </div>
             </div>
             <div class="field">
                 <label><i class="fas fa-lock"></i> Mot de passe *</label>
-                <input v-model="registerPassword" type="password" placeholder="Minimum 8 caract√®res" @keydown.enter="handleRegister">
+                <input v-model="registerPassword" type="password" placeholder="Minimum 8 caractËres" @keydown.enter="handleRegister">
             </div>
             <div class="error" v-if="registerError">{{ registerError }}</div>
             <div class="success" v-if="registerSuccess">{{ registerSuccess }}</div>
             <button class="btn btn-success btn-block btn-lg" @click="handleRegister"><i class="fas fa-user-check"></i> S'inscrire</button>
             <div class="back-link"><a @click="currentPage='landing'"><i class="fas fa-arrow-left"></i> Retour</a></div>
-            <div class="back-link" style="margin-top:0.5rem;"><a @click="currentPage='login'">D√©j√† un compte ? Se connecter</a></div>
+            <div class="back-link" style="margin-top:0.5rem;"><a @click="currentPage='login'">DÈj‡ un compte ? Se connecter</a></div>
         </div>
 
         <!-- ========== ADMIN CODE ========== -->
         <div v-else-if="currentPage === 'admin-code'" class="admin-code-page">
             <span class="icon-big"><i class="fas fa-crown"></i></span>
             <h2>Code Administrateur</h2>
-            <p>Entrez le code admin pour acc√©der aux fonctionnalit√©s d'administration.<br>
+            <p>Entrez le code admin pour accÈder aux fonctionnalitÈs d'administration.<br>
             <span style="font-size:0.8rem;color:var(--text2);">(Vous pouvez passer si vous n'avez pas de code)</span></p>
             <input v-model="adminCodeInput" placeholder="Entrez le code admin..." @keydown.enter="handleAdminCode">
             <div class="error" v-if="adminCodeError">{{ adminCodeError }}</div>
@@ -537,25 +534,25 @@
         <!-- ========== LICENCE PAGE ========== -->
         <div v-else-if="currentPage === 'licence'" class="licence-page">
             <h1><i class="fas fa-file-contract"></i> Licence et informations</h1>
-            <div class="subtitle">Skaymog ‚Äî Biblioth√®que d'anim√©s</div>
+            <div class="subtitle">Skaymog ó BibliothËque d'animÈs</div>
             
             <div class="section">
-                <h3><i class="fas fa-info-circle"></i> Pr√©sentation</h3>
-                <p>Ce site a √©t√© cr√©√© dans le but de r√©pertorier, lister, partager et faire d√©couvrir des anim√©s aux utilisateurs. Il permet de consulter diff√©rentes informations et contenus li√©s aux anim√©s afin de faciliter leur d√©couverte et leur partage.</p>
+                <h3><i class="fas fa-info-circle"></i> PrÈsentation</h3>
+                <p>Ce site a ÈtÈ crÈÈ dans le but de rÈpertorier, lister, partager et faire dÈcouvrir des animÈs aux utilisateurs. Il permet de consulter diffÈrentes informations et contenus liÈs aux animÈs afin de faciliter leur dÈcouverte et leur partage.</p>
             </div>
             
             <div class="section">
-                <h3><i class="fas fa-copyright"></i> Propri√©t√© intellectuelle</h3>
-                <p>Les noms, images, ≈ìuvres, personnages et autres contenus li√©s aux anim√©s pr√©sent√©s sur ce site restent la propri√©t√© de leurs auteurs, studios, √©diteurs et ayants droit respectifs. Skaymog ne revendique aucun droit de propri√©t√© sur ces ≈ìuvres.</p>
+                <h3><i class="fas fa-copyright"></i> PropriÈtÈ intellectuelle</h3>
+                <p>Les noms, images, úuvres, personnages et autres contenus liÈs aux animÈs prÈsentÈs sur ce site restent la propriÈtÈ de leurs auteurs, studios, Èditeurs et ayants droit respectifs. Skaymog ne revendique aucun droit de propriÈtÈ sur ces úuvres.</p>
             </div>
             
             <div class="section">
-                <h3><i class="fas fa-ban"></i> Utilisation non autoris√©e</h3>
-                <p>Toute reproduction ou utilisation non autoris√©e du contenu original cr√©√© sp√©cifiquement pour ce site est interdite sans l'autorisation de ses cr√©ateurs.</p>
+                <h3><i class="fas fa-ban"></i> Utilisation non autorisÈe</h3>
+                <p>Toute reproduction ou utilisation non autorisÈe du contenu original crÈÈ spÈcifiquement pour ce site est interdite sans l'autorisation de ses crÈateurs.</p>
             </div>
             
             <div class="section">
-                <h3><i class="fas fa-users"></i> Cr√©ateurs du site</h3>
+                <h3><i class="fas fa-users"></i> CrÈateurs du site</h3>
                 <div class="creators">
                     <span class="creator"><i class="fas fa-user"></i> Nottiks</span>
                     <span class="creator"><i class="fas fa-user"></i> B Rendi</span>
@@ -566,11 +563,11 @@
             
             <div class="footer-licence">
                 <i class="fas fa-dragon" style="color:var(--accent);"></i>
-                <span class="brand">Skaymog</span> ‚Äî ¬© 2026 Tous droits r√©serv√©s.
+                <span class="brand">Skaymog</span> ó © 2026 Tous droits rÈservÈs.
             </div>
             
             <div style="text-align:center;margin-top:1.5rem;">
-                <button class="btn btn-primary" @click="goHome"><i class="fas fa-arrow-left"></i> Retour √† l'accueil</button>
+                <button class="btn btn-primary" @click="goHome"><i class="fas fa-arrow-left"></i> Retour ‡ l'accueil</button>
             </div>
         </div>
 
@@ -578,17 +575,17 @@
         <div v-else-if="currentPage === 'admin-page' && currentUser && currentUser.role === 'admin'" class="admin-panel-page">
             <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem;margin-bottom:1rem;">
                 <h2><i class="fas fa-crown"></i> Panel Administrateur</h2>
-                <button class="btn btn-sm" @click="goHome"><i class="fas fa-arrow-left"></i> Retour √† l'accueil</button>
+                <button class="btn btn-sm" @click="goHome"><i class="fas fa-arrow-left"></i> Retour ‡ l'accueil</button>
             </div>
             
-            <h3 style="color:var(--accent2);margin-bottom:0.8rem;"><i class="fas fa-plus-circle"></i> Ajouter / Modifier un anim√©</h3>
+            <h3 style="color:var(--accent2);margin-bottom:0.8rem;"><i class="fas fa-plus-circle"></i> Ajouter / Modifier un animÈ</h3>
             <div class="admin-form">
                 <div class="field">
                     <label>Titre *</label>
                     <input v-model="adminForm.title" placeholder="Titre">
                 </div>
                 <div class="field">
-                    <label>√âpisodes</label>
+                    <label>…pisodes</label>
                     <input v-model.number="adminForm.ep" type="number" placeholder="24">
                 </div>
                 <div class="field">
@@ -604,7 +601,7 @@
                     <input v-model.number="adminForm.films" type="number" placeholder="0">
                 </div>
                 <div class="field">
-                    <label>Cat√©gorie</label>
+                    <label>CatÈgorie</label>
                     <select v-model="adminForm.category">
                         <option v-for="c in categories" :value="c">{{c}}</option>
                         <option value="">Aucune</option>
@@ -615,8 +612,8 @@
                     <input type="file" class="file-input" @change="handleAdminImage" accept="image/*">
                 </div>
                 <div class="field" style="flex:1 0 200px;min-width:150px;">
-                    <label>R√©sum√©</label>
-                    <textarea v-model="adminForm.summary" placeholder="R√©sum√© de l'anime..."></textarea>
+                    <label>RÈsumÈ</label>
+                    <textarea v-model="adminForm.summary" placeholder="RÈsumÈ de l'anime..."></textarea>
                 </div>
                 <button class="btn btn-primary" @click="adminSubmit">
                     <i class="fas" :class="adminForm.editId ? 'fa-save' : 'fa-plus'"></i>
@@ -635,7 +632,7 @@
                 <span v-if="currentUser && currentUser.id !== viewedUser.id && currentUser.role !== 'guest'" style="display:flex;gap:0.5rem;flex-wrap:wrap;">
                     <button class="follow-btn" :class="{following:isFollowing(viewedUser.id)}" @click="toggleFollow(viewedUser.id)">
                         <i class="fas" :class="isFollowing(viewedUser.id) ? 'fa-user-minus' : 'fa-user-plus'"></i>
-                        {{ isFollowing(viewedUser.id) ? 'Se d√©sabonner' : 'S\'abonner' }}
+                        {{ isFollowing(viewedUser.id) ? 'Se dÈsabonner' : 'S\'abonner' }}
                     </button>
                     <button class="btn btn-primary btn-sm" @click="startChat(viewedUser.id)" v-if="isFriend(viewedUser.id)">
                         <i class="fas fa-comment"></i> Message
@@ -644,7 +641,7 @@
                         <i class="fas fa-user-friends"></i> Ami
                     </span>
                     <span v-else-if="isFollowing(viewedUser.id)" style="background:var(--text2);color:var(--bg);padding:0.2rem 0.8rem;border-radius:40px;font-size:0.7rem;display:flex;align-items:center;gap:4px;">
-                        <i class="fas fa-user-plus"></i> Abonn√©
+                        <i class="fas fa-user-plus"></i> AbonnÈ
                     </span>
                 </span>
             </div>
@@ -657,8 +654,8 @@
                 <div class="info">
                     <div class="name">{{ viewedUser.displayName || viewedUser.username }}</div>
                     <div class="username">@{{ viewedUser.username }}</div>
-                    <span class="role" v-if="viewedUser.role === 'admin'">üëë Administrateur</span>
-                    <span class="role" v-else>üë§ Utilisateur</span>
+                    <span class="role" v-if="viewedUser.role === 'admin'"> Administrateur</span>
+                    <span class="role" v-else> Utilisateur</span>
                     <div style="margin-top:4px;">
                         <span v-if="isUserOnline(viewedUser.id)" class="btn-online"><i class="fas fa-circle"></i> En ligne</span>
                         <span v-else class="btn-offline"><i class="fas fa-circle"></i> Hors ligne</span>
@@ -669,20 +666,20 @@
             <div class="user-stats">
                 <div class="stat" @click="viewUserWatched">
                     <div class="number">{{ getUserWatchedCount(viewedUser.id) }}</div>
-                    <div class="label"><i class="fas fa-eye"></i> Anim√©s vus</div>
+                    <div class="label"><i class="fas fa-eye"></i> AnimÈs vus</div>
                 </div>
                 <div class="stat" @click="viewUserPublished">
                     <div class="number">{{ getUserPublishedCount(viewedUser.id) }}</div>
-                    <div class="label"><i class="fas fa-upload"></i> Publi√©s/Propos√©s</div>
+                    <div class="label"><i class="fas fa-upload"></i> PubliÈs/ProposÈs</div>
                 </div>
                 <div class="stat">
                     <div class="number">{{ formatFollowers(getFollowersCount(viewedUser.id)) }}</div>
-                    <div class="label"><i class="fas fa-users"></i> Abonn√©s</div>
+                    <div class="label"><i class="fas fa-users"></i> AbonnÈs</div>
                 </div>
             </div>
             
             <div v-if="showUserPublished">
-                <h3 style="color:var(--accent2);margin:1rem 0 0.5rem;">Anim√©s publi√©s/propos√©s par {{ viewedUser.displayName || viewedUser.username }}</h3>
+                <h3 style="color:var(--accent2);margin:1rem 0 0.5rem;">AnimÈs publiÈs/proposÈs par {{ viewedUser.displayName || viewedUser.username }}</h3>
                 <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:1rem;">
                     <div v-for="anime in userPublishedAnimes" :key="anime.id" style="background:var(--bg3);border-radius:12px;padding:0.5rem;border:1px solid var(--border);cursor:pointer;" @click="goToDetail(anime.id)">
                         <div style="width:100%;aspect-ratio:16/10;background:var(--bg2);border-radius:8px;overflow:hidden;margin-bottom:0.3rem;">
@@ -691,7 +688,7 @@
                         </div>
                         <div style="font-size:0.8rem;font-weight:600;">{{ anime.title }}</div>
                     </div>
-                    <div v-if="userPublishedAnimes.length===0" style="grid-column:1/-1;text-align:center;padding:1rem;color:var(--text2);">Aucun anim√© publi√©</div>
+                    <div v-if="userPublishedAnimes.length===0" style="grid-column:1/-1;text-align:center;padding:1rem;color:var(--text2);">Aucun animÈ publiÈ</div>
                 </div>
             </div>
             
@@ -729,7 +726,7 @@
                 <div class="info">
                     <div class="name">{{ currentUser.displayName }}</div>
                     <div class="username">@{{ currentUser.username }}</div>
-                    <span class="role">{{ currentUser.role === 'admin' ? 'üëë Administrateur' : 'üë§ Utilisateur' }}</span>
+                    <span class="role">{{ currentUser.role === 'admin' ? ' Administrateur' : ' Utilisateur' }}</span>
                     <div style="margin-top:4px;">
                         <span class="btn-online"><i class="fas fa-circle"></i> En ligne</span>
                     </div>
@@ -739,11 +736,11 @@
             <div class="profile-stats">
                 <div class="stat" @click="viewMyWatched">
                     <div class="number">{{ watchedCount }}</div>
-                    <div class="label"><i class="fas fa-eye"></i> Anim√©s vus</div>
+                    <div class="label"><i class="fas fa-eye"></i> AnimÈs vus</div>
                 </div>
                 <div class="stat" @click="viewMyPublished">
                     <div class="number">{{ getUserPublishedCount(currentUser.id) }}</div>
-                    <div class="label"><i class="fas fa-upload"></i> Publi√©s/Propos√©s</div>
+                    <div class="label"><i class="fas fa-upload"></i> PubliÈs/ProposÈs</div>
                 </div>
                 <div class="stat">
                     <div class="number">{{ getMyFriendsCount() }}</div>
@@ -751,7 +748,7 @@
                 </div>
                 <div class="stat">
                     <div class="number">{{ formatFollowers(getFollowersCount(currentUser.id)) }}</div>
-                    <div class="label"><i class="fas fa-users"></i> Abonn√©s</div>
+                    <div class="label"><i class="fas fa-users"></i> AbonnÈs</div>
                 </div>
             </div>
             
@@ -762,7 +759,7 @@
                 </div>
                 <div class="field">
                     <label><i class="fas fa-lock"></i> Mot de passe</label>
-                    <input v-model="profileForm.password" type="password" placeholder="Nouveau mot de passe (min 8 caract√®res)">
+                    <input v-model="profileForm.password" type="password" placeholder="Nouveau mot de passe (min 8 caractËres)">
                 </div>
                 <div class="field">
                     <label><i class="fas fa-image"></i> Photo de profil</label>
@@ -773,9 +770,9 @@
                     <label style="color:var(--accent2);font-weight:700;"><i class="fas fa-shield-alt"></i> Code Admin actuel</label>
                     <div class="admin-code-display">{{ getFullAdminCode() }}</div>
                     <div style="display:flex;gap:0.8rem;flex-wrap:wrap;margin-top:0.5rem;">
-                        <button class="btn btn-sm btn-primary" @click="generateNewAdminCode"><i class="fas fa-sync"></i> G√©n√©rer un nouveau code</button>
-                        <input v-model="customAdminCode" placeholder="Ou entrez un code personnalis√©" style="flex:1;min-width:150px;background:var(--bg2);border:1px solid var(--border);padding:0.3rem 0.8rem;border-radius:40px;color:var(--text);outline:none;">
-                        <button class="btn btn-sm btn-success" @click="setCustomAdminCode"><i class="fas fa-check"></i> D√©finir</button>
+                        <button class="btn btn-sm btn-primary" @click="generateNewAdminCode"><i class="fas fa-sync"></i> GÈnÈrer un nouveau code</button>
+                        <input v-model="customAdminCode" placeholder="Ou entrez un code personnalisÈ" style="flex:1;min-width:150px;background:var(--bg2);border:1px solid var(--border);padding:0.3rem 0.8rem;border-radius:40px;color:var(--text);outline:none;">
+                        <button class="btn btn-sm btn-success" @click="setCustomAdminCode"><i class="fas fa-check"></i> DÈfinir</button>
                     </div>
                 </div>
                 
@@ -788,7 +785,7 @@
                     <button class="btn btn-secondary" @click="toggleAdminMode" v-if="currentUser.role === 'admin'">
                         <i class="fas fa-user"></i> Passer en mode normal
                     </button>
-                    <button class="btn btn-danger" @click="logout" style="margin-left:auto;"><i class="fas fa-sign-out-alt"></i> D√©connexion</button>
+                    <button class="btn btn-danger" @click="logout" style="margin-left:auto;"><i class="fas fa-sign-out-alt"></i> DÈconnexion</button>
                 </div>
             </div>
         </div>
@@ -811,7 +808,7 @@
                         <div class="info">
                             <div class="name">{{ user.displayName || user.username }}</div>
                             <div class="last-msg">{{ getLastMessage(user.id) }}</div>
-                            <div class="typing-indicator" v-if="isTyping(user.id)">‚úçÔ∏è En train d'√©crire...</div>
+                            <div class="typing-indicator" v-if="isTyping(user.id)"> En train d'Ècrire...</div>
                             <span class="status" :class="isUserOnline(user.id) ? 'online' : 'offline'">
                                 <i class="fas fa-circle"></i> {{ isUserOnline(user.id) ? 'En ligne' : 'Hors ligne' }}
                             </span>
@@ -820,7 +817,7 @@
                     </div>
                     <div v-if="chatUsers.length === 0" style="text-align:center;padding:2rem;color:var(--text2);">
                         <i class="fas fa-inbox" style="font-size:2rem;display:block;margin-bottom:0.5rem;"></i>
-                        Aucune conversation. Abonnez-vous √† des utilisateurs pour discuter !
+                        Aucune conversation. Abonnez-vous ‡ des utilisateurs pour discuter !
                     </div>
                 </div>
             </div>
@@ -837,7 +834,7 @@
                         <i class="fas fa-circle"></i> {{ isUserOnline(selectedChatUser.id) ? 'En ligne' : 'Hors ligne' }}
                     </span>
                     <span class="typing-indicator" v-if="isTyping(selectedChatUser.id)" style="margin-left:auto;color:var(--accent2);font-style:italic;font-size:0.8rem;">
-                        ‚úçÔ∏è En train d'√©crire...
+                         En train d'Ècrire...
                     </span>
                 </div>
                 
@@ -853,8 +850,8 @@
                 </div>
                 
                 <div class="chat-input">
-                    <input v-model="newMessage" placeholder="√âcrire un message..." @keydown.enter="sendMessage" @focus="startTyping" @blur="stopTyping">
-                    <span class="typing-status" v-if="isTyping(selectedChatUser.id)">‚úçÔ∏è</span>
+                    <input v-model="newMessage" placeholder="…crire un message..." @keydown.enter="sendMessage" @focus="startTyping" @blur="stopTyping">
+                    <span class="typing-status" v-if="isTyping(selectedChatUser.id)"></span>
                     <button class="audio-btn" :class="{recording:isRecording}" @click="toggleRecording">
                         <i class="fas" :class="isRecording ? 'fa-stop' : 'fa-microphone'"></i>
                     </button>
@@ -923,11 +920,11 @@
                             <img v-if="anime.thumb" :src="anime.thumb" :alt="anime.title" loading="lazy" @error="e=>e.target.style.display='none'">
                             <i v-else class="fas fa-image"></i>
                             <span class="proposed-by" v-if="anime.proposedBy">par {{ getUserName(anime.proposedBy) }}</span>
-                            <span class="badge-watched" v-if="isWatched(anime.id)">‚úì Vu</span>
+                            <span class="badge-watched" v-if="isWatched(anime.id)"> Vu</span>
                         </div>
                         <div class="title">{{ anime.title }}</div>
                         <div class="details">
-                            <span><i class="fas fa-film"></i> {{anime.ep||0}} √©p.</span>
+                            <span><i class="fas fa-film"></i> {{anime.ep||0}} Èp.</span>
                             <span v-if="anime.studio"><i class="fas fa-building"></i> {{anime.studio}}</span>
                             <span><i class="fas fa-layer-group"></i> S{{anime.saison||1}}</span>
                         </div>
@@ -943,7 +940,7 @@
                     </div>
                     <div v-if="paginatedHome.length===0" style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--text2);">
                         <i class="fas fa-inbox" style="font-size:2rem;display:block;margin-bottom:0.5rem;"></i>
-                        Aucun anim√© trouv√©
+                        Aucun animÈ trouvÈ
                     </div>
                 </div>
                 
@@ -959,14 +956,14 @@
                 <div class="list-header">
                     <h2 style="color:var(--accent);"><i class="fas fa-list"></i> Mes listes</h2>
                     <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
-                        <button class="btn btn-primary btn-sm" @click="showCreateList=true"><i class="fas fa-plus"></i> Cr√©er une liste</button>
+                        <button class="btn btn-primary btn-sm" @click="showCreateList=true"><i class="fas fa-plus"></i> CrÈer une liste</button>
                     </div>
                 </div>
                 
                 <div v-if="showCreateList" style="background:var(--bg3);padding:1rem;border-radius:12px;margin-bottom:1rem;border:1px solid var(--border);">
                     <div style="display:flex;gap:0.8rem;flex-wrap:wrap;align-items:center;">
                         <input v-model="newListName" placeholder="Nom de la liste" style="flex:1;min-width:150px;background:var(--bg2);border:1px solid var(--border);padding:0.5rem 1rem;border-radius:40px;color:var(--text);outline:none;">
-                        <button class="btn btn-success btn-sm" @click="createList"><i class="fas fa-check"></i> Cr√©er</button>
+                        <button class="btn btn-success btn-sm" @click="createList"><i class="fas fa-check"></i> CrÈer</button>
                         <button class="btn btn-sm" @click="showCreateList=false; newListName=''"><i class="fas fa-times"></i> Annuler</button>
                     </div>
                 </div>
@@ -976,10 +973,10 @@
                         <i class="fas fa-eye"></i> Vus <span class="count">{{ watchedCount }}</span>
                     </div>
                     <div class="list-tab" :class="{active:selectedList==='liked'}" @click="selectedList='liked'">
-                        <i class="fas fa-heart"></i> Aim√©s <span class="count">{{ likedCount }}</span>
+                        <i class="fas fa-heart"></i> AimÈs <span class="count">{{ likedCount }}</span>
                     </div>
                     <div class="list-tab" :class="{active:selectedList==='toWatch'}" @click="selectedList='toWatch'">
-                        <i class="fas fa-clock"></i> √Ä voir <span class="count">{{ toWatchCount }}</span>
+                        <i class="fas fa-clock"></i> ¿ voir <span class="count">{{ toWatchCount }}</span>
                     </div>
                     <div class="list-tab" v-for="(list, name) in customLists" :key="name" :class="{active:selectedList===name}" @click="selectedList=name">
                         <i class="fas fa-folder"></i> {{ name }} <span class="count">{{ list.length }}</span>
@@ -995,13 +992,13 @@
                         </div>
                         <div class="info">
                             <div class="title">{{ getAnime(id) ? getAnime(id).title : 'Inconnu' }}</div>
-                            <div class="sub">{{ getAnime(id) ? (getAnime(id).category || 'Sans cat√©gorie') : '' }}</div>
+                            <div class="sub">{{ getAnime(id) ? (getAnime(id).category || 'Sans catÈgorie') : '' }}</div>
                         </div>
                         <button class="remove-btn" @click.stop="removeFromList(id)"><i class="fas fa-times-circle"></i></button>
                     </div>
                     <div v-if="currentListItems.length===0" style="grid-column:1/-1;text-align:center;padding:2rem;color:var(--text2);">
                         <i class="fas fa-inbox" style="font-size:2rem;display:block;margin-bottom:0.5rem;"></i>
-                        Aucun anim√© dans cette liste
+                        Aucun animÈ dans cette liste
                     </div>
                 </div>
             </div>
@@ -1020,13 +1017,13 @@
                             <i v-else class="fas fa-image"></i>
                             <span class="proposed-by">par {{ getUserName(anime.proposedBy) }}</span>
                         </div>
-                        <div class="title">{{ anime.title }} <span style="font-size:0.6rem;background:var(--accent2);color:#0b0a0c;padding:0.05rem 0.6rem;border-radius:20px;">Propos√©</span></div>
+                        <div class="title">{{ anime.title }} <span style="font-size:0.6rem;background:var(--accent2);color:#0b0a0c;padding:0.05rem 0.6rem;border-radius:20px;">ProposÈ</span></div>
                         <div class="details">
-                            <span><i class="fas fa-film"></i> {{anime.ep||0}} √©p.</span>
+                            <span><i class="fas fa-film"></i> {{anime.ep||0}} Èp.</span>
                             <span v-if="anime.studio"><i class="fas fa-building"></i> {{anime.studio}}</span>
                         </div>
                         <div class="actions" @click.stop>
-                            <span style="font-size:0.7rem;color:var(--text2);">{{ anime.status === 'pending' ? '‚è≥ En attente' : '‚úÖ Valid√©' }}</span>
+                            <span style="font-size:0.7rem;color:var(--text2);">{{ anime.status === 'pending' ? ' En attente' : ' ValidÈ' }}</span>
                         </div>
                     </div>
                     <div v-if="paginatedProposals.length===0" style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--text2);">
@@ -1059,9 +1056,9 @@
                         <div class="followers-count">
                             <i class="fas fa-users"></i> {{ formatFollowers(getFollowersCount(user.id)) }}
                         </div>
-                        <span style="font-size:0.65rem;color:var(--text2);">üëÅÔ∏è {{ getUserWatchedCount(user.id) }}</span>
+                        <span style="font-size:0.65rem;color:var(--text2);"> {{ getUserWatchedCount(user.id) }}</span>
                     </div>
-                    <div v-if="filteredUsers.length===0" style="text-align:center;padding:2rem;color:var(--text2);">Aucun utilisateur trouv√©</div>
+                    <div v-if="filteredUsers.length===0" style="text-align:center;padding:2rem;color:var(--text2);">Aucun utilisateur trouvÈ</div>
                 </div>
             </div>
 
@@ -1071,7 +1068,7 @@
                 <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1.2rem;">
                     <div style="background:var(--bg2);padding:1.2rem;border-radius:var(--radius);border:1px solid var(--border);text-align:center;border-top:3px solid var(--accent);">
                         <div style="font-size:2.2rem;color:var(--accent);">{{ allAnimes.length }}</div>
-                        <div style="color:var(--text2)">Total anim√©s</div>
+                        <div style="color:var(--text2)">Total animÈs</div>
                     </div>
                     <div style="background:var(--bg2);padding:1.2rem;border-radius:var(--radius);border:1px solid var(--border);text-align:center;border-top:3px solid var(--accent);">
                         <div style="font-size:2.2rem;color:var(--accent);">{{ proposals.filter(p=>p.status==='pending').length }}</div>
@@ -1083,11 +1080,11 @@
                     </div>
                     <div style="background:var(--bg2);padding:1.2rem;border-radius:var(--radius);border:1px solid var(--border);text-align:center;border-top:3px solid var(--accent);">
                         <div style="font-size:2.2rem;color:var(--accent);">{{ categories.length }}</div>
-                        <div style="color:var(--text2)">Cat√©gories</div>
+                        <div style="color:var(--text2)">CatÈgories</div>
                     </div>
                 </div>
                 <div style="margin-top:1.5rem;background:var(--bg2);padding:1.2rem;border-radius:var(--radius);border:1px solid var(--border);">
-                    <h3 style="color:var(--text2);margin-bottom:0.5rem;">Top cat√©gories</h3>
+                    <h3 style="color:var(--text2);margin-bottom:0.5rem;">Top catÈgories</h3>
                     <div v-for="(count, cat) in categoryStats" :key="cat" style="display:flex;justify-content:space-between;padding:0.3rem 0;border-bottom:1px solid var(--border);">
                         <span>{{ cat }}</span>
                         <span style="color:var(--accent);">{{ count }}</span>
@@ -1107,16 +1104,16 @@
                 <div class="detail-info">
                     <h1>{{ selectedAnime.title }}</h1>
                     <div class="meta">
-                        <span class="meta-item"><i class="fas fa-film"></i> {{ selectedAnime.ep || 0 }} √©pisodes</span>
+                        <span class="meta-item"><i class="fas fa-film"></i> {{ selectedAnime.ep || 0 }} Èpisodes</span>
                         <span class="meta-item"><i class="fas fa-layer-group"></i> Saison {{ selectedAnime.saison || 1 }}</span>
                         <span class="meta-item" v-if="selectedAnime.films"><i class="fas fa-video"></i> {{ selectedAnime.films }} films</span>
                         <span class="meta-item" v-if="selectedAnime.studio"><i class="fas fa-building"></i> {{ selectedAnime.studio }}</span>
-                        <span class="meta-item"><i class="fas fa-tag"></i> {{ selectedAnime.category || 'Non cat√©goris√©' }}</span>
+                        <span class="meta-item"><i class="fas fa-tag"></i> {{ selectedAnime.category || 'Non catÈgorisÈ' }}</span>
                         <span class="meta-item"><i class="fas fa-heart" style="color:var(--accent);"></i> {{ (selectedAnime.likes||[]).length }}</span>
-                        <span class="meta-item" v-if="selectedAnime.proposedBy">Propos√© par {{ getUserName(selectedAnime.proposedBy) }}</span>
+                        <span class="meta-item" v-if="selectedAnime.proposedBy">ProposÈ par {{ getUserName(selectedAnime.proposedBy) }}</span>
                     </div>
                     <div class="summary" v-if="selectedAnime.summary">
-                        <h3><i class="fas fa-align-left"></i> R√©sum√©</h3>
+                        <h3><i class="fas fa-align-left"></i> RÈsumÈ</h3>
                         <p>{{ selectedAnime.summary }}</p>
                     </div>
                     <div class="detail-actions">
@@ -1128,21 +1125,21 @@
                             <i class="fas fa-eye"></i> {{ isWatched(selectedAnime.id) ? 'Vu' : 'Marquer comme vu' }}
                         </button>
                         <button class="btn" @click="addToWatchList(selectedAnime.id)">
-                            <i class="fas fa-clock"></i> Ajouter √† "√Ä voir"
+                            <i class="fas fa-clock"></i> Ajouter ‡ "¿ voir"
                         </button>
                         <button class="btn" @click="showAddToList = !showAddToList">
-                            <i class="fas fa-folder-plus"></i> Ajouter √† une liste
+                            <i class="fas fa-folder-plus"></i> Ajouter ‡ une liste
                         </button>
-                        <span class="proposed-by" v-if="selectedAnime.proposedBy">Propos√© par {{ getUserName(selectedAnime.proposedBy) }}</span>
+                        <span class="proposed-by" v-if="selectedAnime.proposedBy">ProposÈ par {{ getUserName(selectedAnime.proposedBy) }}</span>
                     </div>
                     
                     <div v-if="showAddToList" style="margin-top:1rem;background:var(--bg3);padding:1rem;border-radius:12px;border:1px solid var(--border);">
                         <div style="display:flex;gap:0.8rem;flex-wrap:wrap;align-items:center;">
-                            <span style="font-weight:600;color:var(--text2);">Ajouter √† :</span>
+                            <span style="font-weight:600;color:var(--text2);">Ajouter ‡ :</span>
                             <button class="btn btn-sm" v-for="(list, name) in customLists" :key="name" @click="addToCustomList(selectedAnime.id, name)">
                                 <i class="fas fa-folder"></i> {{ name }}
                             </button>
-                            <span style="color:var(--text2);font-size:0.8rem;" v-if="Object.keys(customLists).length===0">Aucune liste personnalis√©e</span>
+                            <span style="color:var(--text2);font-size:0.8rem;" v-if="Object.keys(customLists).length===0">Aucune liste personnalisÈe</span>
                         </div>
                     </div>
                     
@@ -1152,14 +1149,14 @@
                             <button class="btn btn-sm btn-primary" @click="editAnimeFromDetail"><i class="fas fa-edit"></i> Modifier</button>
                             <button class="btn btn-sm btn-danger" @click="confirmDeleteAnime(selectedAnime.id)"><i class="fas fa-trash"></i> Supprimer</button>
                             <button class="btn btn-sm" @click="toggleFinished(selectedAnime.id)">
-                                <i class="fas fa-check-circle"></i> {{ selectedAnime.finished ? 'Marquer en cours' : 'Marquer termin√©' }}
+                                <i class="fas fa-check-circle"></i> {{ selectedAnime.finished ? 'Marquer en cours' : 'Marquer terminÈ' }}
                             </button>
                         </div>
                     </div>
                     
                     <div v-if="selectedAnime && currentUser && currentUser.role !== 'guest'" style="margin-top:1rem;">
                         <button class="recommend-btn" :class="{recommended:isRecommended(selectedAnime.id)}" @click="toggleRecommend(selectedAnime.id)">
-                            <i class="fas fa-star"></i> {{ isRecommended(selectedAnime.id) ? 'Recommand√©' : 'Recommander' }}
+                            <i class="fas fa-star"></i> {{ isRecommended(selectedAnime.id) ? 'RecommandÈ' : 'Recommander' }}
                             <span class="count" style="font-size:0.7rem;margin-left:4px;">{{ getRecommendCount(selectedAnime.id) }}</span>
                         </button>
                     </div>
@@ -1175,7 +1172,7 @@
                             Aucun avis pour le moment
                         </div>
                         <div class="comment-form" v-if="currentUser && currentUser.role !== 'guest'">
-                            <input v-model="newComment" placeholder="√âcrire un avis..." @keydown.enter="addComment(selectedAnime.id)">
+                            <input v-model="newComment" placeholder="…crire un avis..." @keydown.enter="addComment(selectedAnime.id)">
                             <button class="btn btn-primary btn-sm" @click="addComment(selectedAnime.id)"><i class="fas fa-paper-plane"></i> Envoyer</button>
                         </div>
                         <div v-else style="color:var(--text2);font-size:0.85rem;padding:0.5rem 0;">
@@ -1194,7 +1191,7 @@
             </div>
             <i class="fas fa-dragon" style="color:var(--accent);"></i>
             <span class="brand">Skaymog</span>
-            ¬∑ {{ allAnimes.length }} anim√©s
+            ∑ {{ allAnimes.length }} animÈs
             <span style="color:var(--text2);font-size:0.7rem;margin-left:0.5rem;">
                 <i class="fas fa-users"></i> {{ users.length }} utilisateurs
                 <i class="fas fa-eye" style="margin-left:0.8rem;"></i> {{ watchedCount }} vus
@@ -1203,7 +1200,7 @@
         <div class="footer" v-else>
             <i class="fas fa-dragon" style="color:var(--accent);"></i>
             <span class="brand">Skaymog</span>
-            ¬∑ Biblioth√®que d'anim√©s
+            ∑ BibliothËque d'animÈs
         </div>
     </div>
 </div>
@@ -1226,7 +1223,7 @@ function buildInitialAnimes() {
         {title:'Dragon Ball', ep:153, saison:1, films:4, studio:'Toei Animation', category:'Shonen'},
         {title:'Dragon Ball Z', ep:291, saison:1, films:15, studio:'Toei Animation', category:'Shonen'},
         {title:'Dragon Ball Super', ep:131, saison:1, films:2, studio:'Toei Animation', category:'Shonen'},
-        {title:'Hunter √ó Hunter (2011)', ep:148, saison:6, films:2, studio:'Madhouse', category:'Shonen'},
+        {title:'Hunter ◊ Hunter (2011)', ep:148, saison:6, films:2, studio:'Madhouse', category:'Shonen'},
         {title:'Yu Yu Hakusho', ep:112, saison:1, films:2, studio:'Pierrot', category:'Shonen'},
         {title:'Fullmetal Alchemist: Brotherhood', ep:64, saison:1, films:1, studio:'Bones', category:'Shonen'},
         {title:'Soul Eater', ep:51, saison:1, films:0, studio:'Bones', category:'Shonen'},
@@ -1274,7 +1271,7 @@ function buildInitialAnimes() {
         {title:'Call of the Night', ep:26, saison:2, films:0, studio:'Liden Films', category:'Shonen'},
         {title:'Delicious in Dungeon', ep:24, saison:1, films:0, studio:'Trigger', category:'Shonen'},
         {title:'Undead Murder Farce', ep:13, saison:1, films:0, studio:'Lapin Track', category:'Shonen'},
-        {title:'Ron Kamonohashi\'s Forbidden Deductions', ep:26, saison:2, films:0, studio:'diomed√©a', category:'Shonen'},
+        {title:'Ron Kamonohashi\'s Forbidden Deductions', ep:26, saison:2, films:0, studio:'diomedÈa', category:'Shonen'},
         {title:'Migi & Dali', ep:13, saison:1, films:0, studio:'Geek Toys', category:'Shonen'},
         {title:'The Witch and the Beast', ep:12, saison:1, films:0, studio:'Yokohama Animation Laboratory', category:'Shonen'},
         {title:'Reign of the Seven Spellblades', ep:15, saison:1, films:0, studio:'J.C.Staff', category:'Shonen'},
@@ -1289,7 +1286,7 @@ function buildInitialAnimes() {
         {title:'Takopi\'s Original Sin', ep:6, saison:1, films:0, studio:'ENISHIYA', category:'Shonen'},
         {title:'Moonrise', ep:18, saison:1, films:0, studio:'Wit Studio', category:'Shonen'},
         {title:'Ninja Kamui', ep:13, saison:1, films:0, studio:'E&H Production', category:'Shonen'},
-        {title:'√úbel Blatt', ep:12, saison:1, films:0, studio:'Satelight', category:'Shonen'},
+        {title:'‹bel Blatt', ep:12, saison:1, films:0, studio:'Satelight', category:'Shonen'},
         {title:'Ishura', ep:24, saison:2, films:0, studio:'Passione', category:'Shonen'},
         {title:'Baban Baban Ban Vampire', ep:12, saison:1, films:0, studio:'Gaina', category:'Shonen'},
         {title:'Kinnikuman Perfect Origin Arc', ep:22, saison:2, films:0, studio:'Production I.G', category:'Shonen'},
@@ -1304,7 +1301,7 @@ function buildInitialAnimes() {
         {title:'Kunon the Sorcerer Can See', ep:12, saison:1, films:0, studio:'TBA', category:'Shonen'},
         {title:'Sentenced to Be a Hero', ep:12, saison:1, films:0, studio:'Studio KAI', category:'Shonen'},
         {title:'Onmyo Kaiten Re:Birth Verse', ep:24, saison:1, films:0, studio:'David Production', category:'Shonen'},
-        {title:'Ranma ¬Ω (2024)', ep:36, saison:3, films:0, studio:'MAPPA', category:'Shonen'},
+        {title:'Ranma Ω (2024)', ep:36, saison:3, films:0, studio:'MAPPA', category:'Shonen'},
         {title:'The Seven Deadly Sins: Four Knights of the Apocalypse', ep:48, saison:2, films:0, studio:'Telecom Animation Film', category:'Shonen'},
         {title:'Gachiakuta', ep:24, saison:1, films:0, studio:'Bones Film', category:'Shonen'},
         {title:'World Trigger', ep:99, saison:3, films:0, studio:'Toei Animation', category:'Shonen'},
@@ -1326,7 +1323,7 @@ function buildInitialAnimes() {
         {title:'Kingdom', ep:142, saison:5, films:0, studio:'Pierrot / Studio Signpost', category:'Seinen'},
         {title:'Pluto', ep:8, saison:1, films:0, studio:'Studio M2', category:'Seinen'},
         {title:'Berserk (1997)', ep:25, saison:1, films:0, studio:'OLM', category:'Seinen'},
-        {title:'Berserk: The Golden Age Arc Memorial Edition', ep:13, saison:1, films:3, studio:'Studio 4¬∞C', category:'Seinen'},
+        {title:'Berserk: The Golden Age Arc Memorial Edition', ep:13, saison:1, films:3, studio:'Studio 4∞C', category:'Seinen'},
         {title:'Parasyte -the maxim-', ep:24, saison:1, films:0, studio:'Madhouse', category:'Seinen'},
         {title:'Golden Kamuy', ep:49, saison:4, films:0, studio:'Geno Studio / Brain\'s Base', category:'Seinen'},
         {title:'Oshi no Ko', ep:35, saison:3, films:0, studio:'Doga Kobo', category:'Seinen'},
@@ -1413,7 +1410,7 @@ function buildInitialAnimes() {
         {title:'Princess Principal', ep:12, saison:1, films:0, studio:'Actas', category:'Shojo'},
 
         // ========== ISEKAI ==========
-        {title:'Re:Zero ‚àí Starting Life in Another World', ep:50, saison:3, films:0, studio:'White Fox', category:'Isekai'},
+        {title:'Re:Zero  Starting Life in Another World', ep:50, saison:3, films:0, studio:'White Fox', category:'Isekai'},
         {title:'Sword Art Online', ep:96, saison:4, films:3, studio:'A-1 Pictures', category:'Isekai'},
         {title:'Mushoku Tensei: Jobless Reincarnation', ep:48, saison:2, films:0, studio:'Studio Bind', category:'Isekai'},
         {title:'That Time I Got Reincarnated as a Slime', ep:60, saison:3, films:1, studio:'Eight Bit', category:'Isekai'},
@@ -1459,7 +1456,7 @@ function buildInitialAnimes() {
         {title:'Reborn to Master the Blade', ep:12, saison:1, films:0, studio:'Studio Comet', category:'Isekai'},
         {title:'I Got a Cheat Skill in Another World', ep:13, saison:1, films:0, studio:'Millepensee', category:'Isekai'},
         {title:'The Aristocrat\'s Otherworldly Adventure', ep:12, saison:1, films:0, studio:'EMT Squared', category:'Isekai'},
-        {title:'The Saint\'s Magic Power is Omnipotent', ep:24, saison:2, films:0, studio:'Diomed√©a', category:'Isekai'},
+        {title:'The Saint\'s Magic Power is Omnipotent', ep:24, saison:2, films:0, studio:'DiomedÈa', category:'Isekai'},
         {title:'Skeleton Knight in Another World', ep:12, saison:1, films:0, studio:'Studio Kai', category:'Isekai'},
         {title:'Reincarnated as a Vending Machine', ep:12, saison:1, films:0, studio:'Studio Gokumi / AXsiZ', category:'Isekai'},
 
@@ -1471,7 +1468,7 @@ function buildInitialAnimes() {
         {title:'Clannad', ep:47, saison:2, films:1, studio:'Kyoto Animation', category:'Romance'},
         {title:'Your Lie in April', ep:22, saison:1, films:0, studio:'A-1 Pictures', category:'Romance'},
         {title:'Ao Haru Ride', ep:12, saison:1, films:0, studio:'Production I.G', category:'Romance'},
-        {title:'Lovely‚òÖComplex', ep:24, saison:1, films:0, studio:'Toei Animation', category:'Romance'},
+        {title:'LovelyComplex', ep:24, saison:1, films:0, studio:'Toei Animation', category:'Romance'},
         {title:'Maid Sama!', ep:26, saison:1, films:0, studio:'J.C.Staff', category:'Romance'},
         {title:'Horimiya', ep:13, saison:1, films:0, studio:'CloverWorks', category:'Romance'},
         {title:'Horimiya: Piece', ep:13, saison:1, films:0, studio:'CloverWorks', category:'Romance'},
@@ -1483,7 +1480,7 @@ function buildInitialAnimes() {
         {title:'Oregairu', ep:38, saison:3, films:0, studio:'Brain\'s Base / Feel', category:'Romance'},
         {title:'Masamune-kun\'s Revenge', ep:24, saison:2, films:0, studio:'Silver Link', category:'Romance'},
         {title:'Rent-a-Girlfriend', ep:36, saison:3, films:0, studio:'TMS Entertainment', category:'Romance'},
-        {title:'Domestic Girlfriend', ep:12, saison:1, films:0, studio:'Diomed√©a', category:'Romance'},
+        {title:'Domestic Girlfriend', ep:12, saison:1, films:0, studio:'DiomedÈa', category:'Romance'},
         {title:'White Album 2', ep:13, saison:1, films:0, studio:'Satelight', category:'Romance'},
         {title:'Scum\'s Wish', ep:12, saison:1, films:0, studio:'Lerche', category:'Romance'},
         {title:'Honey and Clover', ep:36, saison:2, films:0, studio:'J.C.Staff', category:'Romance'},
@@ -1565,13 +1562,13 @@ function buildInitialAnimes() {
         {title:'L\'Atelier des Sorciers', ep:0, saison:0, films:0, studio:'TBA', category:'Random'},
         {title:'Cyberpunk: Edgerunners', ep:10, saison:1, films:0, studio:'Trigger', category:'Random'},
         {title:'Marriage Toxin', ep:0, saison:0, films:0, studio:'TBA', category:'Random'},
-        {title:'D√©tective Conan', ep:1100, saison:0, films:27, studio:'TMS Entertainment', category:'Random'},
+        {title:'DÈtective Conan', ep:1100, saison:0, films:27, studio:'TMS Entertainment', category:'Random'},
         {title:'Baki Dou', ep:39, saison:2, films:0, studio:'TMS Entertainment', category:'Random'},
         {title:'Classroom of the Elite', ep:39, saison:3, films:0, studio:'Lerche', category:'Random'},
         {title:'The Daily Life of the Immortal King', ep:48, saison:4, films:0, studio:'Haoliners Animation', category:'Random'},
         {title:'Attack on Titan', ep:94, saison:4, films:0, studio:'Wit Studio / MAPPA', category:'Random'},
         {title:'In the Clear Moonlit Dusk', ep:0, saison:0, films:0, studio:'TBA', category:'Random'},
-        {title:'Spy √ó Family', ep:37, saison:2, films:0, studio:'Wit Studio / CloverWorks', category:'Random'},
+        {title:'Spy ◊ Family', ep:37, saison:2, films:0, studio:'Wit Studio / CloverWorks', category:'Random'},
         {title:'Demon of the Shadow Realm', ep:0, saison:0, films:0, studio:'TBA', category:'Random'},
         {title:'Baki Hanma', ep:39, saison:2, films:0, studio:'TMS Entertainment', category:'Random'},
         {title:'Mob Psycho 100', ep:37, saison:3, films:0, studio:'Bones', category:'Random'},
@@ -1592,7 +1589,7 @@ function buildInitialAnimes() {
         {title:'Perfect World', ep:150, saison:1, films:0, studio:'Sparkly Key Animation', category:'Manhwa'},
         {title:'Battle Through the Heavens', ep:100, saison:1, films:0, studio:'Motion Magic', category:'Manhwa'},
         {title:'The Ravages of Time', ep:20, saison:1, films:0, studio:'B.C May Pictures', category:'Manhwa'},
-        {title:'Rakshasa Street', ep:30, saison:3, films:0, studio:'L¬≤ Studio', category:'Manhwa'},
+        {title:'Rakshasa Street', ep:30, saison:3, films:0, studio:'L≤ Studio', category:'Manhwa'},
         {title:'The Outcast', ep:24, saison:2, films:0, studio:'Haoliners Animation', category:'Manhwa'},
         {title:'Noblesse', ep:13, saison:1, films:0, studio:'Production I.G', category:'Manhwa'},
         {title:'Tower of God', ep:13, saison:2, films:0, studio:'Telecom Animation Film', category:'Manhwa'},
@@ -1630,7 +1627,7 @@ function buildInitialAnimes() {
         {title:'Fate/stay night', ep:24, saison:1, films:0, studio:'Deen', category:'Retro'},
         {title:'Fate/Zero', ep:25, saison:2, films:0, studio:'Ufotable', category:'Retro'},
         {title:'Digimon Adventure', ep:54, saison:1, films:2, studio:'Toei Animation', category:'Retro'},
-        {title:'Pok√©mon', ep:1000, saison:1, films:20, studio:'OLM', category:'Retro'},
+        {title:'PokÈmon', ep:1000, saison:1, films:20, studio:'OLM', category:'Retro'},
         {title:'GTO', ep:43, saison:1, films:0, studio:'Pierrot', category:'Retro'},
         {title:'Beck', ep:26, saison:1, films:0, studio:'Madhouse', category:'Retro'},
         {title:'Afro Samurai', ep:5, saison:1, films:1, studio:'Gonzo', category:'Retro'},
@@ -1725,7 +1722,7 @@ function buildInitialAnimes() {
         {title:'Kill la Kill', ep:24, saison:1, films:0, studio:'Trigger', category:'Ecchi'},
         {title:'Darling in the Franxx', ep:24, saison:1, films:0, studio:'Trigger / A-1 Pictures', category:'Ecchi'},
         {title:'Highschool of the Dead', ep:12, saison:1, films:0, studio:'Madhouse', category:'Ecchi'},
-        {title:'Campione!', ep:13, saison:1, films:0, studio:'Diomed√©a', category:'Ecchi'},
+        {title:'Campione!', ep:13, saison:1, films:0, studio:'DiomedÈa', category:'Ecchi'},
         {title:'Strike the Blood', ep:50, saison:4, films:0, studio:'Silver Link', category:'Ecchi'},
         {title:'Demon King Daimao', ep:12, saison:1, films:0, studio:'Artland', category:'Ecchi'},
         {title:'Hagure Yuusha no Estetica', ep:12, saison:1, films:0, studio:'Arms', category:'Ecchi'},
@@ -1755,7 +1752,7 @@ function buildInitialAnimes() {
         {title:'Hajime no Ippo: New Challenger', ep:26, saison:1, films:0, studio:'Madhouse', category:'Sport'},
         {title:'Hajime no Ippo: Rising', ep:25, saison:1, films:0, studio:'Madhouse', category:'Sport'},
         {title:'Run with the Wind', ep:23, saison:1, films:0, studio:'Production I.G', category:'Sport'},
-        {title:'Ahiru no Sora', ep:50, saison:1, films:0, studio:'Diomed√©a', category:'Sport'},
+        {title:'Ahiru no Sora', ep:50, saison:1, films:0, studio:'DiomedÈa', category:'Sport'},
         {title:'Bakuten!!', ep:12, saison:1, films:0, studio:'Zexcs', category:'Sport'},
         {title:'Yowamushi Pedal', ep:100, saison:1, films:0, studio:'TMS Entertainment', category:'Sport'},
         {title:'Over Drive', ep:26, saison:1, films:0, studio:'Xebec', category:'Sport'},
@@ -1905,7 +1902,7 @@ const app = createApp({
         const categoryStats = computed(() => {
             const stats = {};
             allAnimes.value.forEach(a => {
-                const cat = a.category || 'Non cat√©goris√©';
+                const cat = a.category || 'Non catÈgorisÈ';
                 stats[cat] = (stats[cat] || 0) + 1;
             });
             return stats;
@@ -1955,15 +1952,93 @@ const app = createApp({
         // FORMAT FOLLOWERS
         // ============================================================
         const formatFollowers = (count) => {
-            if (count < 1) return '0 abonn√©';
-            if (count === 1) return '1 abonn√©';
-            if (count < 1000) return count + ' abonn√©s';
-            if (count < 10000) return (count / 1000).toFixed(1).replace('.', ',') + 'k abonn√©s';
-            return Math.floor(count / 1000) + 'k abonn√©s';
+            if (count < 1) return '0 abonnÈ';
+            if (count === 1) return '1 abonnÈ';
+            if (count < 1000) return count + ' abonnÈs';
+            if (count < 10000) return (count / 1000).toFixed(1).replace('.', ',') + 'k abonnÈs';
+            return Math.floor(count / 1000) + 'k abonnÈs';
         };
 
         // ============================================================
-        // METHODS
+        // FIREBASE - SAUVEGARDE / CHARGEMENT
+        // ============================================================
+        const saveAll = async () => {
+            if (!window.db) return;
+            try {
+                await db.doc(STATE_PATH).set({
+                    users: users.value,
+                    animes: animes.value,
+                    proposals: proposals.value,
+                    watchedList: watchedList.value,
+                    toWatchList: toWatchList.value,
+                    customLists: customLists.value,
+                    recommendations: recommendations.value,
+                    followers: followers.value,
+                    friends: friends.value,
+                    messages: messages.value,
+                    notifications: notifications.value
+                });
+            } catch (e) {
+                console.error("Erreur sauvegarde Firebase :", e);
+            }
+        };
+
+        const loadAll = async () => {
+            if (!window.db) return false;
+            try {
+                const doc = await db.doc(STATE_PATH).get();
+                if (doc.exists) {
+                    const data = doc.data();
+                    users.value = data.users || [];
+                    animes.value = data.animes || [];
+                    proposals.value = data.proposals || [];
+                    watchedList.value = data.watchedList || [];
+                    toWatchList.value = data.toWatchList || [];
+                    customLists.value = data.customLists || {};
+                    recommendations.value = data.recommendations || {};
+                    followers.value = data.followers || {};
+                    friends.value = data.friends || [];
+                    messages.value = data.messages || {};
+                    notifications.value = data.notifications || [];
+                    return true;
+                }
+            } catch (e) {
+                console.error("Erreur chargement Firebase :", e);
+            }
+            return false;
+        };
+
+        let unsubFirebase = null;
+        const listenState = () => {
+            if (!window.db) return;
+            if (unsubFirebase) unsubFirebase();
+            unsubFirebase = db.doc(STATE_PATH).onSnapshot((doc) => {
+                if (doc.exists) {
+                    const data = doc.data();
+                    users.value = data.users || [];
+                    animes.value = data.animes || [];
+                    proposals.value = data.proposals || [];
+                    watchedList.value = data.watchedList || [];
+                    toWatchList.value = data.toWatchList || [];
+                    customLists.value = data.customLists || {};
+                    recommendations.value = data.recommendations || {};
+                    followers.value = data.followers || {};
+                    friends.value = data.friends || [];
+                    messages.value = data.messages || {};
+                    notifications.value = data.notifications || [];
+                    // Recalcul de l'Ètat en ligne et amis
+                    if (currentUser.value) {
+                        updateFriends();
+                        updateOnlineStatus();
+                    }
+                }
+            }, (error) => {
+                console.error("Erreur Ècoute Firebase :", error);
+            });
+        };
+
+        // ============================================================
+        // METHODS (GETTERS / HELPERS)
         // ============================================================
         const getUserName = (userId) => {
             const user = users.value.find(u => u.id === userId);
@@ -2024,7 +2099,6 @@ const app = createApp({
                 }
             }
             friends.value = newFriends;
-            saveAll();
         };
 
         // ============================================================
@@ -2039,6 +2113,7 @@ const app = createApp({
         const updateOnlineStatus = () => {
             if (currentUser.value) {
                 onlineUsers.value.add(currentUser.value.id);
+                // Simule quelques utilisateurs en ligne pour l'affichage
                 for (const user of users.value) {
                     if (user.id !== currentUser.value.id && Math.random() > 0.5) {
                         onlineUsers.value.add(user.id);
@@ -2058,7 +2133,7 @@ const app = createApp({
             const msgs = messages.value[userId] || [];
             if (msgs.length === 0) return 'Aucun message';
             const last = msgs[msgs.length - 1];
-            return last.type === 'audio' ? 'üéµ Message audio' : last.content;
+            return last.type === 'audio' ? ' Message audio' : last.content;
         };
 
         const getUnreadCount = (userId) => {
@@ -2110,7 +2185,7 @@ const app = createApp({
                     const reply = {
                         id: Date.now() + 1,
                         senderId: selectedChatUser.value.id,
-                        content: 'Merci pour ton message ! üòä',
+                        content: 'Merci pour ton message ! ',
                         date: new Date().toISOString(),
                         type: 'text',
                         read: false
@@ -2120,7 +2195,7 @@ const app = createApp({
                     addNotification(
                         selectedChatUser.value.id,
                         'fa-reply',
-                        `<strong>${selectedChatUser.value.displayName || selectedChatUser.value.username}</strong> vous a r√©pondu`,
+                        `<strong>${selectedChatUser.value.displayName || selectedChatUser.value.username}</strong> vous a rÈpondu`,
                         'message'
                     );
                     nextTick(() => scrollToBottom());
@@ -2173,7 +2248,7 @@ const app = createApp({
                     mediaRecorder.value.start();
                     isRecording.value = true;
                 } catch (err) {
-                    alert('Impossible d\'acc√©der au microphone');
+                    alert('Impossible d\'accÈder au microphone');
                 }
             } else {
                 mediaRecorder.value.stop();
@@ -2245,78 +2320,8 @@ const app = createApp({
         };
 
         // ============================================================
-        // SAVE / LOAD
+        // CREATE DEFAULT ADMIN
         // ============================================================
-        const saveAll = () => {
-            localStorage.setItem('skaymog_users', JSON.stringify(users.value));
-            localStorage.setItem('skaymog_animes', JSON.stringify(animes.value));
-            localStorage.setItem('skaymog_proposals', JSON.stringify(proposals.value));
-            localStorage.setItem('skaymog_watched', JSON.stringify(watchedList.value));
-            localStorage.setItem('skaymog_towatch', JSON.stringify(toWatchList.value));
-            localStorage.setItem('skaymog_customlists', JSON.stringify(customLists.value));
-            localStorage.setItem('skaymog_recommendations', JSON.stringify(recommendations.value));
-            localStorage.setItem('skaymog_followers', JSON.stringify(followers.value));
-            localStorage.setItem('skaymog_friends', JSON.stringify(friends.value));
-            localStorage.setItem('skaymog_messages', JSON.stringify(messages.value));
-            localStorage.setItem('skaymog_notifications', JSON.stringify(notifications.value));
-            localStorage.setItem('skaymog_admincode', currentAdminCode.value);
-            localStorage.setItem('skaymog_admincount', String(adminLoginCount.value));
-            if (currentUser.value) {
-                localStorage.setItem('skaymog_session', JSON.stringify({ user: currentUser.value }));
-            }
-            localStorage.setItem('skaymog_theme', darkMode.value ? 'dark' : 'light');
-            localStorage.setItem('skaymog_notification_id', String(notificationId.value));
-        };
-
-        const loadAll = () => {
-            const savedUsers = localStorage.getItem('skaymog_users');
-            if (savedUsers) users.value = JSON.parse(savedUsers);
-            const savedAnimes = localStorage.getItem('skaymog_animes');
-            if (savedAnimes) animes.value = JSON.parse(savedAnimes);
-            const savedProposals = localStorage.getItem('skaymog_proposals');
-            if (savedProposals) proposals.value = JSON.parse(savedProposals);
-            const savedWatched = localStorage.getItem('skaymog_watched');
-            if (savedWatched) watchedList.value = JSON.parse(savedWatched);
-            const savedToWatch = localStorage.getItem('skaymog_towatch');
-            if (savedToWatch) toWatchList.value = JSON.parse(savedToWatch);
-            const savedLists = localStorage.getItem('skaymog_customlists');
-            if (savedLists) customLists.value = JSON.parse(savedLists);
-            const savedRecs = localStorage.getItem('skaymog_recommendations');
-            if (savedRecs) recommendations.value = JSON.parse(savedRecs);
-            const savedFollowers = localStorage.getItem('skaymog_followers');
-            if (savedFollowers) followers.value = JSON.parse(savedFollowers);
-            const savedFriends = localStorage.getItem('skaymog_friends');
-            if (savedFriends) friends.value = JSON.parse(savedFriends);
-            const savedMessages = localStorage.getItem('skaymog_messages');
-            if (savedMessages) messages.value = JSON.parse(savedMessages);
-            const savedNotifications = localStorage.getItem('skaymog_notifications');
-            if (savedNotifications) notifications.value = JSON.parse(savedNotifications);
-            const savedNotifId = localStorage.getItem('skaymog_notification_id');
-            if (savedNotifId) notificationId.value = parseInt(savedNotifId) || 0;
-            const savedCode = localStorage.getItem('skaymog_admincode');
-            if (savedCode) currentAdminCode.value = savedCode;
-            const savedCount = localStorage.getItem('skaymog_admincount');
-            if (savedCount) adminLoginCount.value = parseInt(savedCount) || 0;
-            const theme = localStorage.getItem('skaymog_theme');
-            if (theme === 'light') {
-                darkMode.value = false;
-                document.body.classList.remove('light');
-            } else {
-                darkMode.value = true;
-                document.body.classList.add('light');
-            }
-            
-            const session = localStorage.getItem('skaymog_session');
-            if (session) {
-                try {
-                    const data = JSON.parse(session);
-                    currentUser.value = data.user;
-                    return true;
-                } catch(e) {}
-            }
-            return false;
-        };
-
         const createDefaultAdmin = () => {
             if (users.value.length === 0) {
                 currentAdminCode.value = generateRandomCode();
@@ -2331,15 +2336,17 @@ const app = createApp({
                     isSemiAdmin: false,
                     watchedCount: 0
                 });
+                // Sauvegarde immÈdiate pour persister l'admin dans Firestore
+                saveAll();
             }
             if (animes.value.length === 0) {
                 animes.value = buildInitialAnimes();
+                saveAll();
             }
-            saveAll();
         };
 
         // ============================================================
-        // AUTH (suite...)
+        // AUTH
         // ============================================================
         const handleLogin = () => {
             loginError.value = '';
@@ -2367,7 +2374,7 @@ const app = createApp({
             }
             
             currentUser.value = user;
-            loginSuccess.value = 'Connexion r√©ussie !';
+            loginSuccess.value = 'Connexion rÈussie !';
             saveAll();
             updateFriends();
             updateOnlineStatus();
@@ -2392,7 +2399,7 @@ const app = createApp({
                 return;
             }
             if (registerPassword.value.length < 8) {
-                registerError.value = 'Votre mot de passe doit contenir au moins 8 caract√®res';
+                registerError.value = 'Votre mot de passe doit contenir au moins 8 caractËres';
                 return;
             }
             
@@ -2424,7 +2431,7 @@ const app = createApp({
             };
             
             users.value.push(newUser);
-            registerSuccess.value = 'Inscription r√©ussie !';
+            registerSuccess.value = 'Inscription rÈussie !';
             saveAll();
             
             setTimeout(() => {
@@ -2484,7 +2491,7 @@ const app = createApp({
             const guest = {
                 id: 'guest_' + Date.now(),
                 username: 'invite_' + Date.now().toString(36).slice(-4),
-                displayName: 'Invit√©',
+                displayName: 'InvitÈ',
                 role: 'guest',
                 avatar: '',
                 isGuest: true
@@ -2496,8 +2503,8 @@ const app = createApp({
 
         const logout = () => {
             showModal.value = true;
-            modalTitle.value = 'üö™ D√©connexion';
-            modalMessage.value = 'Voulez-vous vraiment vous d√©connecter ?';
+            modalTitle.value = ' DÈconnexion';
+            modalMessage.value = 'Voulez-vous vraiment vous dÈconnecter ?';
             modalAction.value = () => {
                 currentUser.value = null;
                 localStorage.removeItem('skaymog_session');
@@ -2659,7 +2666,7 @@ const app = createApp({
                 animes.value.push(newAnime);
                 for (const user of users.value) {
                     if (user.id !== currentUser.value?.id) {
-                        addNotification(user.id, 'fa-film', `<strong>${currentUser.value?.displayName || 'Un admin'}</strong> a ajout√© <strong>${anime.title}</strong> √† la biblioth√®que`, 'anime_added');
+                        addNotification(user.id, 'fa-film', `<strong>${currentUser.value?.displayName || 'Un admin'}</strong> a ajoutÈ <strong>${anime.title}</strong> ‡ la bibliothËque`, 'anime_added');
                     }
                 }
             } else {
@@ -2680,7 +2687,7 @@ const app = createApp({
             if (found) {
                 Object.assign(found, data);
                 if (data.status === 'published' && found.proposedBy) {
-                    addNotification(found.proposedBy, 'fa-check-circle', `Votre proposition <strong>${found.title}</strong> a √©t√© accept√©e !`, 'proposal_accepted');
+                    addNotification(found.proposedBy, 'fa-check-circle', `Votre proposition <strong>${found.title}</strong> a ÈtÈ acceptÈe !`, 'proposal_accepted');
                 }
                 saveAll();
                 return found;
@@ -2749,15 +2756,15 @@ const app = createApp({
 
         const addToWatchList = (id) => {
             if (!currentUser.value || currentUser.value.role === 'guest') {
-                alert('Connectez-vous pour ajouter √† la liste !');
+                alert('Connectez-vous pour ajouter ‡ la liste !');
                 return;
             }
             if (!toWatchList.value.includes(id)) {
                 toWatchList.value.push(id);
                 saveAll();
-                alert('Ajout√© √† "√Ä voir" !');
+                alert('AjoutÈ ‡ "¿ voir" !');
             } else {
-                alert('D√©j√† dans la liste "√Ä voir"');
+                alert('DÈj‡ dans la liste "¿ voir"');
             }
         };
 
@@ -2785,11 +2792,11 @@ const app = createApp({
             }
             const name = newListName.value.trim();
             if (customLists.value[name]) {
-                alert('Une liste avec ce nom existe d√©j√†');
+                alert('Une liste avec ce nom existe dÈj‡');
                 return;
             }
             if (['watched', 'liked', 'toWatch'].includes(name)) {
-                alert('Ce nom est r√©serv√©');
+                alert('Ce nom est rÈservÈ');
                 return;
             }
             customLists.value[name] = [];
@@ -2801,7 +2808,7 @@ const app = createApp({
 
         const deleteList = (name) => {
             if (['watched', 'liked', 'toWatch'].includes(name)) {
-                alert('Vous ne pouvez pas supprimer les listes pr√©d√©finies');
+                alert('Vous ne pouvez pas supprimer les listes prÈdÈfinies');
                 return;
             }
             if (confirm(`Voulez-vous vraiment supprimer la liste "${name}" ?`)) {
@@ -2818,9 +2825,9 @@ const app = createApp({
             if (!customLists.value[listName].includes(id)) {
                 customLists.value[listName].push(id);
                 saveAll();
-                alert(`Ajout√© √† la liste "${listName}" !`);
+                alert(`AjoutÈ ‡ la liste "${listName}" !`);
             } else {
-                alert('D√©j√† dans cette liste');
+                alert('DÈj‡ dans cette liste');
             }
         };
 
@@ -2882,7 +2889,7 @@ const app = createApp({
                 return;
             }
             if (currentUser.value.id === userId) {
-                alert('Vous ne pouvez pas vous suivre vous-m√™me');
+                alert('Vous ne pouvez pas vous suivre vous-mÍme');
                 return;
             }
             if (!followers.value[userId]) {
@@ -2893,7 +2900,7 @@ const app = createApp({
                 followers.value[userId].splice(idx, 1);
             } else {
                 followers.value[userId].push(currentUser.value.id);
-                addNotification(userId, 'fa-user-plus', `<strong>${currentUser.value.displayName || currentUser.value.username}</strong> s'est abonn√© √† vous`, 'new_follower');
+                addNotification(userId, 'fa-user-plus', `<strong>${currentUser.value.displayName || currentUser.value.username}</strong> s'est abonnÈ ‡ vous`, 'new_follower');
             }
             saveAll();
             updateFriends();
@@ -2924,7 +2931,7 @@ const app = createApp({
             saveAll();
             
             if (anime.proposedBy && anime.proposedBy !== currentUser.value.id) {
-                addNotification(anime.proposedBy, 'fa-comment', `<strong>${currentUser.value.displayName || currentUser.value.username}</strong> a comment√© sur <strong>${anime.title}</strong>`, 'comment_reply');
+                addNotification(anime.proposedBy, 'fa-comment', `<strong>${currentUser.value.displayName || currentUser.value.username}</strong> a commentÈ sur <strong>${anime.title}</strong>`, 'comment_reply');
             }
         };
 
@@ -2938,12 +2945,12 @@ const app = createApp({
         // ============================================================
         const generateNewAdminCode = () => {
             showModal.value = true;
-            modalTitle.value = 'üîÑ G√©n√©rer un nouveau code admin';
-            modalMessage.value = 'Voulez-vous vraiment g√©n√©rer un nouveau code admin ? L\'ancien code ne fonctionnera plus.';
+            modalTitle.value = ' GÈnÈrer un nouveau code admin';
+            modalMessage.value = 'Voulez-vous vraiment gÈnÈrer un nouveau code admin ? L\'ancien code ne fonctionnera plus.';
             modalAction.value = () => {
                 currentAdminCode.value = generateRandomCode();
                 saveAll();
-                alert('Nouveau code admin g√©n√©r√© : ' + getFullAdminCode());
+                alert('Nouveau code admin gÈnÈrÈ : ' + getFullAdminCode());
                 showModal.value = false;
             };
         };
@@ -2960,13 +2967,13 @@ const app = createApp({
                 return;
             }
             showModal.value = true;
-            modalTitle.value = 'üîÑ Changer le code admin';
-            modalMessage.value = `Voulez-vous vraiment d√©finir le nouveau code admin : ${code} ?`;
+            modalTitle.value = ' Changer le code admin';
+            modalMessage.value = `Voulez-vous vraiment dÈfinir le nouveau code admin : ${code} ?`;
             modalAction.value = () => {
                 currentAdminCode.value = code;
                 customAdminCode.value = '';
                 saveAll();
-                alert('Nouveau code admin d√©fini : ' + getFullAdminCode());
+                alert('Nouveau code admin dÈfini : ' + getFullAdminCode());
                 showModal.value = false;
             };
         };
@@ -2990,22 +2997,22 @@ const app = createApp({
                         currentAdminCode.value = generateRandomCode();
                         adminLoginCount.value++;
                         saveAll();
-                        alert('Vous √™tes maintenant en mode admin !');
+                        alert('Vous Ítes maintenant en mode admin !');
                         goHome();
-                        addNotification('system', 'fa-crown', 'Vous √™tes pass√© en mode administrateur');
+                        addNotification('system', 'fa-crown', 'Vous Ítes passÈ en mode administrateur');
                     }
                 } else {
                     alert('Code admin incorrect');
                 }
             } else if (currentUser.value.role === 'admin') {
-                if (confirm('Passer en mode normal ? Vous resterez avec les droits admin.') && confirm('√ätes-vous s√ªr ?')) {
+                if (confirm('Passer en mode normal ? Vous resterez avec les droits admin.') && confirm(' tes-vous s˚r ?')) {
                     const user = users.value.find(u => u.id === currentUser.value.id);
                     if (user) {
                         user.role = 'user';
                         user.isSemiAdmin = true;
                         currentUser.value = user;
                         saveAll();
-                        alert('Vous √™tes maintenant en mode normal (semi-admin)');
+                        alert('Vous Ítes maintenant en mode normal (semi-admin)');
                         goHome();
                     }
                 }
@@ -3037,11 +3044,11 @@ const app = createApp({
             
             if (adminForm.value.editId) {
                 updateAnime(adminForm.value.editId, data);
-                alert('Anim√© modifi√© !');
+                alert('AnimÈ modifiÈ !');
             } else {
                 data.createdBy = currentUser.value.id;
                 addAnime(data);
-                alert('Anim√© ajout√© !');
+                alert('AnimÈ ajoutÈ !');
             }
             
             adminForm.value = { title:'', ep:0, saison:1, films:0, studio:'', category:'', thumb:'', summary:'', status:'published', editId:null };
@@ -3072,8 +3079,8 @@ const app = createApp({
 
         const confirmDeleteAnime = (id) => {
             showModal.value = true;
-            modalTitle.value = '‚ö†Ô∏è Supprimer l\'anim√©';
-            modalMessage.value = 'Voulez-vous vraiment supprimer cet anim√© ? Cette action est irr√©versible.';
+            modalTitle.value = ' Supprimer l\'animÈ';
+            modalMessage.value = 'Voulez-vous vraiment supprimer cet animÈ ? Cette action est irrÈversible.';
             modalAction.value = () => {
                 deleteAnime(id);
                 showModal.value = false;
@@ -3105,7 +3112,7 @@ const app = createApp({
         // ============================================================
         const submitProposal = () => {
             if (!currentUser.value || currentUser.value.role === 'guest') {
-                alert('Connectez-vous pour proposer un anim√© !');
+                alert('Connectez-vous pour proposer un animÈ !');
                 return;
             }
             if (!proposalForm.value.title.trim()) {
@@ -3192,7 +3199,7 @@ const app = createApp({
                 users.value[userIdx] = {...currentUser.value};
             }
             saveAll();
-            alert('Profil mis √† jour !');
+            alert('Profil mis ‡ jour !');
             currentPage.value = 'home';
             currentTab.value = 'home';
         };
@@ -3202,7 +3209,7 @@ const app = createApp({
             
             if (profileForm.value.password && profileForm.value.password.length >= 8 && profileForm.value.password !== currentUser.value.password) {
                 showModal.value = true;
-                modalTitle.value = 'üîë Changer le mot de passe';
+                modalTitle.value = ' Changer le mot de passe';
                 modalMessage.value = 'Voulez-vous vraiment changer votre mot de passe ?';
                 modalAction.value = () => {
                     doUpdateProfile();
@@ -3223,30 +3230,54 @@ const app = createApp({
         // ============================================================
         // INIT
         // ============================================================
-        onMounted(() => {
-            const hasSession = loadAll();
+        onMounted(async () => {
+            // Chargement des donnÈes depuis Firestore
+            const hasData = await loadAll();
+            
+            // CrÈation de l'admin par dÈfaut si besoin
             createDefaultAdmin();
             
-            if (darkMode.value) {
+            // …coute en temps rÈel
+            listenState();
+            
+            // ThËme
+            const theme = localStorage.getItem('skaymog_theme');
+            if (theme === 'light') {
+                darkMode.value = false;
                 document.body.classList.remove('light');
             } else {
+                darkMode.value = true;
                 document.body.classList.add('light');
             }
             
-            if (hasSession && currentUser.value) {
-                const userExists = users.value.some(u => u.id === currentUser.value.id);
-                if (!userExists && currentUser.value.role !== 'guest') {
-                    currentUser.value = null;
-                    localStorage.removeItem('skaymog_session');
+            // Session utilisateur
+            const session = localStorage.getItem('skaymog_session');
+            if (session) {
+                try {
+                    const data = JSON.parse(session);
+                    currentUser.value = data.user;
+                    // VÈrifier que l'utilisateur existe encore
+                    const exists = users.value.some(u => u.id === data.user.id);
+                    if (!exists && data.user.role !== 'guest') {
+                        currentUser.value = null;
+                        localStorage.removeItem('skaymog_session');
+                        currentPage.value = 'landing';
+                    } else {
+                        currentPage.value = 'home';
+                        currentTab.value = 'home';
+                        updateFriends();
+                        updateOnlineStatus();
+                    }
+                } catch(e) {
                     currentPage.value = 'landing';
-                } else {
-                    currentPage.value = 'home';
-                    currentTab.value = 'home';
-                    updateFriends();
-                    updateOnlineStatus();
                 }
             } else {
                 currentPage.value = 'landing';
+            }
+            
+            // Si on a chargÈ des donnÈes depuis Firebase mais qu'elles sont vides, on les initialise
+            if (!hasData) {
+                createDefaultAdmin();
             }
         });
 
