@@ -11,9 +11,6 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <script>
-        // ============================================================
-        // CONFIGURATION FIREBASE - SKAYMOG
-        // ============================================================
         const firebaseConfig = {
             apiKey: "AIzaSyCFeRsGMlDn688IT7_N_G02t4hH1mXJol8",
             authDomain: "skaymog.firebaseapp.com",
@@ -23,14 +20,13 @@
             appId: "1:760326549194:web:bc51c2e693c4cc1ed6ce33",
             measurementId: "G-QX927JNZ82"
         };
-
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         window.db = db;
         const STATE_PATH = 'skaymog/appData';
         console.log(' Firebase Firestore connecté !');
     </script>
-    
+
     <style>
         /* ========== STYLES COMPLETS ========== */
         * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI',system-ui,sans-serif; }
@@ -404,7 +400,7 @@
         <!-- ========== HEADER ========== -->
         <header class="header" v-if="currentPage !== 'landing' && currentPage !== 'login' && currentPage !== 'register' && currentPage !== 'admin-code' && currentPage !== 'licence'">
             <div class="logo" @click="goHome">
-                <i class="fas fa-dragon"></i> SKAYMOG <span class="badge">{{ allAnimes.length }}</span>
+                <i class="fas fa-dragon"></i> SKAYMOG <span class="badge">{{ animes.length }}</span>
             </div>
             <div class="header-right">
                 <div class="theme-toggle" @click="toggleTheme">
@@ -469,7 +465,7 @@
                 <button class="btn btn-guest btn-lg" @click="loginAsGuest"><i class="fas fa-user-secret"></i> Invité</button>
             </div>
             <div class="feature-icons">
-                <div class="feature"><i class="fas fa-film"></i><span>{{ allAnimes.length }} animés</span></div>
+                <div class="feature"><i class="fas fa-film"></i><span>{{ animes.length }} animés</span></div>
                 <div class="feature"><i class="fas fa-users"></i><span>{{ users.length }} utilisateurs</span></div>
                 <div class="feature"><i class="fas fa-heart"></i><span>Likes en temps réel</span></div>
                 <div class="feature"><i class="fas fa-comment-dots"></i><span>Messagerie</span></div>
@@ -732,7 +728,7 @@
             
             <div class="profile-stats">
                 <div class="stat" @click="viewMyWatched">
-                    <div class="number">{{ watchedCount }}</div>
+                    <div class="number">{{ watchedList.length }}</div>
                     <div class="label"><i class="fas fa-eye"></i> Animés vus</div>
                 </div>
                 <div class="stat" @click="viewMyPublished">
@@ -891,7 +887,7 @@
                     <i class="fas fa-home"></i> Accueil
                 </button>
                 <button class="nav-item" :class="{active:currentTab==='lists'}" @click="currentTab='lists'; currentPage='lists'">
-                    <i class="fas fa-list"></i> Listes <span class="badge">{{ watchedCount + likedCount }}</span>
+                    <i class="fas fa-list"></i> Listes <span class="badge">{{ watchedList.length + likedCount }}</span>
                 </button>
                 <button class="nav-item" :class="{active:currentTab==='proposals'}" @click="currentTab='proposals'; currentPage='proposals'">
                     <i class="fas fa-lightbulb"></i> Propositions <span class="badge">{{ proposals.filter(p=>p.status==='pending').length }}</span>
@@ -928,7 +924,7 @@
                         <div class="actions" @click.stop>
                             <button class="like-btn" :class="{liked:anime.likes && anime.likes.includes(currentUser.id)}" @click="toggleLike(anime.id)" :disabled="currentUser.role==='guest'">
                                 <i class="fas fa-heart"></i>
-                                <span class="count">{{ (anime.likes || []).length }}</span>
+                                <span class="count">{{ anime.likes ? anime.likes.length : 0 }}</span>
                             </button>
                             <button class="btn-watched" :class="{watched:isWatched(anime.id)}" @click="toggleWatched(anime.id)">
                                 <i class="fas fa-eye"></i> {{ isWatched(anime.id) ? 'Vu' : 'Voir' }}
@@ -967,13 +963,13 @@
                 
                 <div class="list-tabs">
                     <div class="list-tab" :class="{active:selectedList==='watched'}" @click="selectedList='watched'">
-                        <i class="fas fa-eye"></i> Vus <span class="count">{{ watchedCount }}</span>
+                        <i class="fas fa-eye"></i> Vus <span class="count">{{ watchedList.length }}</span>
                     </div>
                     <div class="list-tab" :class="{active:selectedList==='liked'}" @click="selectedList='liked'">
                         <i class="fas fa-heart"></i> Aimés <span class="count">{{ likedCount }}</span>
                     </div>
                     <div class="list-tab" :class="{active:selectedList==='toWatch'}" @click="selectedList='toWatch'">
-                        <i class="fas fa-clock"></i> À voir <span class="count">{{ toWatchCount }}</span>
+                        <i class="fas fa-clock"></i> À voir <span class="count">{{ toWatchList.length }}</span>
                     </div>
                     <div class="list-tab" v-for="(list, name) in customLists" :key="name" :class="{active:selectedList===name}" @click="selectedList=name">
                         <i class="fas fa-folder"></i> {{ name }} <span class="count">{{ list.length }}</span>
@@ -1064,7 +1060,7 @@
                 <h2 style="color:var(--accent);margin-bottom:1rem;"><i class="fas fa-chart-simple"></i> Statistiques</h2>
                 <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1.2rem;">
                     <div style="background:var(--bg2);padding:1.2rem;border-radius:var(--radius);border:1px solid var(--border);text-align:center;border-top:3px solid var(--accent);">
-                        <div style="font-size:2.2rem;color:var(--accent);">{{ allAnimes.length }}</div>
+                        <div style="font-size:2.2rem;color:var(--accent);">{{ animes.length }}</div>
                         <div style="color:var(--text2)">Total animés</div>
                     </div>
                     <div style="background:var(--bg2);padding:1.2rem;border-radius:var(--radius);border:1px solid var(--border);text-align:center;border-top:3px solid var(--accent);">
@@ -1106,7 +1102,7 @@
                         <span class="meta-item" v-if="selectedAnime.films"><i class="fas fa-video"></i> {{ selectedAnime.films }} films</span>
                         <span class="meta-item" v-if="selectedAnime.studio"><i class="fas fa-building"></i> {{ selectedAnime.studio }}</span>
                         <span class="meta-item"><i class="fas fa-tag"></i> {{ selectedAnime.category || 'Non catégorisé' }}</span>
-                        <span class="meta-item"><i class="fas fa-heart" style="color:var(--accent);"></i> {{ (selectedAnime.likes||[]).length }}</span>
+                        <span class="meta-item"><i class="fas fa-heart" style="color:var(--accent);"></i> {{ selectedAnime.likes ? selectedAnime.likes.length : 0 }}</span>
                         <span class="meta-item" v-if="selectedAnime.proposedBy">Proposé par {{ getUserName(selectedAnime.proposedBy) }}</span>
                     </div>
                     <div class="summary" v-if="selectedAnime.summary">
@@ -1115,8 +1111,8 @@
                     </div>
                     <div class="detail-actions">
                         <button class="btn" @click="toggleLike(selectedAnime.id)" :disabled="currentUser.role==='guest'">
-                            <i class="fas fa-heart" :style="{color:(selectedAnime.likes&&selectedAnime.likes.includes(currentUser.id))?'var(--accent)':'var(--text2)'}"></i>
-                            {{ (selectedAnime.likes||[]).length }}
+                            <i class="fas fa-heart" :style="{color:(selectedAnime.likes && selectedAnime.likes.includes(currentUser.id))?'var(--accent)':'var(--text2)'}"></i>
+                            {{ selectedAnime.likes ? selectedAnime.likes.length : 0 }}
                         </button>
                         <button class="btn" :class="{watched:isWatched(selectedAnime.id)}" @click="toggleWatched(selectedAnime.id)">
                             <i class="fas fa-eye"></i> {{ isWatched(selectedAnime.id) ? 'Vu' : 'Marquer comme vu' }}
@@ -1164,6 +1160,9 @@
                             <span class="author" @click="goToUserPage(comment.userId)">{{ getUserName(comment.userId) }}</span>
                             <span class="date">{{ formatDate(comment.date) }}</span>
                             <div class="text">{{ comment.text }}</div>
+                            <button v-if="comment.userId === currentUser.id || currentUser.role === 'admin'" class="btn btn-sm btn-danger" @click="deleteComment(selectedAnime.id, idx)" style="padding:0.1rem 0.4rem;font-size:0.6rem;margin-top:0.2rem;">
+                                <i class="fas fa-trash"></i>
+                            </button>
                         </div>
                         <div v-if="!selectedAnime.comments || selectedAnime.comments.length === 0" style="color:var(--text2);font-size:0.85rem;padding:0.5rem 0;">
                             Aucun avis pour le moment
@@ -1188,10 +1187,9 @@
             </div>
             <i class="fas fa-dragon" style="color:var(--accent);"></i>
             <span class="brand">Skaymog</span>
-            · {{ allAnimes.length }} animés
+            · {{ animes.length }} animés
             <span style="color:var(--text2);font-size:0.7rem;margin-left:0.5rem;">
                 <i class="fas fa-users"></i> {{ users.length }} utilisateurs
-                <i class="fas fa-eye" style="margin-left:0.8rem;"></i> {{ watchedCount }} vus
             </span>
         </div>
         <div class="footer" v-else>
@@ -1815,32 +1813,19 @@ const app = createApp({
         const modalAction = ref(null);
         const modalData = ref(null);
         
-        // Lists
-        const customLists = ref({});
+        // Données personnelles (par utilisateur)
         const watchedList = ref([]);
         const toWatchList = ref([]);
+        const customLists = ref({});
         const recommendations = ref({});
         const followers = ref({});
         const friends = ref([]);
-        
-        // Messaging
         const messages = ref({});
-        const selectedChatUser = ref(null);
-        const newMessage = ref('');
-        const typingStatus = ref({});
-        const isRecording = ref(false);
-        const mediaRecorder = ref(null);
-        const audioChunks = ref([]);
-        const chatMessagesRef = ref(null);
-        
-        // Notifications
         const notifications = ref([]);
-        const notificationId = ref(0);
         
         // Admin code
         const currentAdminCode = ref('AMER');
         const customAdminCode = ref('');
-        // Compteur utilisé uniquement si le nombre d'utilisateurs >= 20
         const adminLoginCounter = ref(0);
         
         // Auth forms
@@ -1848,13 +1833,11 @@ const app = createApp({
         const loginPassword = ref('');
         const loginError = ref('');
         const loginSuccess = ref('');
-        
         const registerDisplayName = ref('');
         const registerUsername = ref('');
         const registerPassword = ref('');
         const registerError = ref('');
         const registerSuccess = ref('');
-        
         const adminCodeInput = ref('');
         const adminCodeError = ref('');
         
@@ -1870,25 +1853,21 @@ const app = createApp({
         // COMPUTED
         // ============================================================
         const allAnimes = computed(() => [...animes.value, ...proposals.value.filter(p => p.status === 'published')]);
-        
         const homeAnimes = computed(() => {
             let list = allAnimes.value;
             if (catFilter.value) list = list.filter(a => a.category === catFilter.value);
             return list;
         });
-        
         const homeTotalPages = computed(() => Math.ceil(homeAnimes.value.length / pageSize) || 1);
         const paginatedHome = computed(() => {
             const start = (homePage.value - 1) * pageSize;
             return homeAnimes.value.slice(start, start + pageSize);
         });
-        
         const proposalList = computed(() => proposals.value.filter(p => p.status === 'pending'));
         const paginatedProposals = computed(() => {
             const start = (homePage.value - 1) * pageSize;
             return proposalList.value.slice(start, start + pageSize);
         });
-        
         const filteredUsers = computed(() => {
             if (!userSearch.value) return users.value;
             const q = userSearch.value.toLowerCase();
@@ -1897,7 +1876,6 @@ const app = createApp({
                 (u.displayName && u.displayName.toLowerCase().includes(q))
             );
         });
-        
         const categoryStats = computed(() => {
             const stats = {};
             allAnimes.value.forEach(a => {
@@ -1906,14 +1884,10 @@ const app = createApp({
             });
             return stats;
         });
-        
-        const watchedCount = computed(() => watchedList.value.length);
         const likedCount = computed(() => {
             if (!currentUser.value) return 0;
             return allAnimes.value.filter(a => a.likes && a.likes.includes(currentUser.value.id)).length;
         });
-        const toWatchCount = computed(() => toWatchList.value.length);
-        
         const currentListItems = computed(() => {
             if (selectedList.value === 'watched') return watchedList.value;
             if (selectedList.value === 'liked') {
@@ -1923,12 +1897,10 @@ const app = createApp({
             if (selectedList.value === 'toWatch') return toWatchList.value;
             return customLists.value[selectedList.value] || [];
         });
-        
         const userPublishedAnimes = computed(() => {
             if (!viewedUser.value) return [];
             return allAnimes.value.filter(a => a.proposedBy === viewedUser.value.id || a.createdBy === viewedUser.value.id);
         });
-        
         const chatUsers = computed(() => {
             if (!currentUser.value) return [];
             const userIds = new Set();
@@ -1942,13 +1914,12 @@ const app = createApp({
             }
             return users.value.filter(u => userIds.has(u.id) && u.id !== currentUser.value.id);
         });
-        
         const unreadNotificationsCount = computed(() => {
             return notifications.value.filter(n => !n.read).length;
         });
 
         // ============================================================
-        // FORMAT FOLLOWERS
+        // HELPERS
         // ============================================================
         const formatFollowers = (count) => {
             if (count < 1) return '0 abonné';
@@ -1957,154 +1928,38 @@ const app = createApp({
             if (count < 10000) return (count / 1000).toFixed(1).replace('.', ',') + 'k abonnés';
             return Math.floor(count / 1000) + 'k abonnés';
         };
-
-        // ============================================================
-        // FIREBASE - SAUVEGARDE / CHARGEMENT / ÉCOUTE
-        // ============================================================
-        let isUpdating = false;
-        let lastDataSnapshot = null;
-
-        const saveAll = async () => {
-            if (!window.db) return;
-            if (isUpdating) return; // évite les boucles
-            isUpdating = true;
-            try {
-                await db.doc(STATE_PATH).set({
-                    users: users.value,
-                    animes: animes.value,
-                    proposals: proposals.value,
-                    watchedList: watchedList.value,
-                    toWatchList: toWatchList.value,
-                    customLists: customLists.value,
-                    recommendations: recommendations.value,
-                    followers: followers.value,
-                    friends: friends.value,
-                    messages: messages.value,
-                    notifications: notifications.value,
-                    adminCode: currentAdminCode.value,
-                    adminLoginCounter: adminLoginCounter.value
-                });
-            } catch (e) {
-                console.error("Erreur sauvegarde Firebase :", e);
-            }
-            isUpdating = false;
-        };
-
-        const loadAll = async () => {
-            if (!window.db) return false;
-            try {
-                const doc = await db.doc(STATE_PATH).get();
-                if (doc.exists) {
-                    const data = doc.data();
-                    users.value = data.users || [];
-                    animes.value = data.animes || [];
-                    proposals.value = data.proposals || [];
-                    watchedList.value = data.watchedList || [];
-                    toWatchList.value = data.toWatchList || [];
-                    customLists.value = data.customLists || {};
-                    recommendations.value = data.recommendations || {};
-                    followers.value = data.followers || {};
-                    friends.value = data.friends || [];
-                    messages.value = data.messages || {};
-                    notifications.value = data.notifications || [];
-                    if (data.adminCode) currentAdminCode.value = data.adminCode;
-                    if (data.adminLoginCounter) adminLoginCounter.value = data.adminLoginCounter;
-                    return true;
-                }
-            } catch (e) {
-                console.error("Erreur chargement Firebase :", e);
-            }
-            return false;
-        };
-
-        let unsubFirebase = null;
-        const listenState = () => {
-            if (!window.db) return;
-            if (unsubFirebase) unsubFirebase();
-            unsubFirebase = db.doc(STATE_PATH).onSnapshot((doc) => {
-                if (doc.exists && !isUpdating) {
-                    const data = doc.data();
-                    // Comparaison simple pour éviter les mises à jour inutiles
-                    const newData = JSON.stringify(data);
-                    if (newData === lastDataSnapshot) return;
-                    lastDataSnapshot = newData;
-                    
-                    users.value = data.users || [];
-                    animes.value = data.animes || [];
-                    proposals.value = data.proposals || [];
-                    watchedList.value = data.watchedList || [];
-                    toWatchList.value = data.toWatchList || [];
-                    customLists.value = data.customLists || {};
-                    recommendations.value = data.recommendations || {};
-                    followers.value = data.followers || {};
-                    friends.value = data.friends || [];
-                    messages.value = data.messages || {};
-                    notifications.value = data.notifications || [];
-                    if (data.adminCode) currentAdminCode.value = data.adminCode;
-                    if (data.adminLoginCounter) adminLoginCounter.value = data.adminLoginCounter;
-                    
-                    if (currentUser.value) {
-                        updateFriends();
-                        updateOnlineStatus();
-                    }
-                }
-            }, (error) => {
-                console.error("Erreur écoute Firebase :", error);
-            });
-        };
-
-        // ============================================================
-        // METHODS (GETTERS / HELPERS)
-        // ============================================================
         const getUserName = (userId) => {
             const user = users.value.find(u => u.id === userId);
             return user ? (user.displayName || user.username) : 'Inconnu';
         };
-        
         const getAnime = (id) => {
             return allAnimes.value.find(a => a.id === id);
         };
-        
-        const isWatched = (id) => {
-            return watchedList.value.includes(id);
+        const isWatched = (id) => watchedList.value.includes(id);
+        const getFullAdminCode = () => ADMIN_BASE_CODE + '-' + currentAdminCode.value + '-' + ADMIN_SUFFIX;
+        const generateRandomCode = () => {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            let code = '';
+            for (let i = 0; i < 5; i++) code += chars.charAt(Math.floor(Math.random() * chars.length));
+            return code;
         };
-        
         const getUserWatchedCount = (userId) => {
             if (currentUser.value && userId === currentUser.value.id) {
                 return watchedList.value.length;
             }
-            const user = users.value.find(u => u.id === userId);
-            return user ? (user.watchedCount || 0) : 0;
+            return 0;
         };
-        
         const getUserPublishedCount = (userId) => {
             return allAnimes.value.filter(a => a.proposedBy === userId || a.createdBy === userId).length;
         };
-        
-        const getFullAdminCode = () => {
-            return ADMIN_BASE_CODE + '-' + currentAdminCode.value + '-' + ADMIN_SUFFIX;
-        };
-        
-        const generateRandomCode = () => {
-            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-            let code = '';
-            for (let i = 0; i < 5; i++) {
-                code += chars.charAt(Math.floor(Math.random() * chars.length));
-            }
-            return code;
-        };
 
         // ============================================================
-        // FRIENDS SYSTEM
+        // FRIENDS / FOLLOW
         // ============================================================
-        const isFriend = (userId) => {
-            if (!currentUser.value) return false;
-            return friends.value.includes(userId);
-        };
-
-        const getMyFriendsCount = () => {
-            return friends.value.length;
-        };
+        const isFriend = (userId) => friends.value.includes(userId);
+        const getMyFriendsCount = () => friends.value.length;
+        const isFollowing = (userId) => followers.value[userId] && followers.value[userId].includes(currentUser.value.id);
+        const getFollowersCount = (userId) => (followers.value[userId] || []).length;
 
         const updateFriends = () => {
             if (!currentUser.value) return;
@@ -2121,11 +1976,7 @@ const app = createApp({
         // ONLINE STATUS
         // ============================================================
         const onlineUsers = ref(new Set());
-        
-        const isUserOnline = (userId) => {
-            return onlineUsers.value.has(userId);
-        };
-
+        const isUserOnline = (userId) => onlineUsers.value.has(userId);
         const updateOnlineStatus = () => {
             if (currentUser.value) {
                 onlineUsers.value.add(currentUser.value.id);
@@ -2140,22 +1991,17 @@ const app = createApp({
         // ============================================================
         // MESSAGING
         // ============================================================
-        const getChatMessages = (userId) => {
-            return messages.value[userId] || [];
-        };
-
+        const getChatMessages = (userId) => messages.value[userId] || [];
         const getLastMessage = (userId) => {
             const msgs = messages.value[userId] || [];
             if (msgs.length === 0) return 'Aucun message';
             const last = msgs[msgs.length - 1];
             return last.type === 'audio' ? ' Message audio' : last.content;
         };
-
         const getUnreadCount = (userId) => {
             const msgs = messages.value[userId] || [];
             return msgs.filter(m => !m.read && m.senderId !== currentUser.value.id).length;
         };
-
         const startChat = (userId) => {
             const user = users.value.find(u => u.id === userId);
             if (user) {
@@ -2165,20 +2011,13 @@ const app = createApp({
                     messages.value[userId].forEach(m => m.read = true);
                 }
                 saveAll();
-                nextTick(() => {
-                    scrollToBottom();
-                });
+                nextTick(() => { scrollToBottom(); });
             }
         };
-
-        const openChat = (userId) => {
-            startChat(userId);
-        };
-
+        const openChat = (userId) => startChat(userId);
         const sendMessage = () => {
             if (!selectedChatUser.value) return;
             if (!newMessage.value.trim() && !isRecording.value) return;
-            
             const msg = {
                 id: Date.now(),
                 senderId: currentUser.value.id,
@@ -2187,14 +2026,10 @@ const app = createApp({
                 type: 'text',
                 read: false
             };
-            
-            if (!messages.value[selectedChatUser.value.id]) {
-                messages.value[selectedChatUser.value.id] = [];
-            }
+            if (!messages.value[selectedChatUser.value.id]) messages.value[selectedChatUser.value.id] = [];
             messages.value[selectedChatUser.value.id].push(msg);
             newMessage.value = '';
             saveAll();
-            
             if (Math.random() > 0.3) {
                 setTimeout(() => {
                     const reply = {
@@ -2207,19 +2042,12 @@ const app = createApp({
                     };
                     messages.value[selectedChatUser.value.id].push(reply);
                     saveAll();
-                    addNotification(
-                        selectedChatUser.value.id,
-                        'fa-reply',
-                        `<strong>${selectedChatUser.value.displayName || selectedChatUser.value.username}</strong> vous a répondu`,
-                        'message'
-                    );
+                    addNotification(selectedChatUser.value.id, 'fa-reply', `<strong>${selectedChatUser.value.displayName || selectedChatUser.value.username}</strong> vous a répondu`, 'message');
                     nextTick(() => scrollToBottom());
                 }, 1000 + Math.random() * 2000);
             }
-            
             nextTick(() => scrollToBottom());
         };
-
         const sendAudioMessage = (audioData) => {
             if (!selectedChatUser.value) return;
             const msg = {
@@ -2230,29 +2058,22 @@ const app = createApp({
                 type: 'audio',
                 read: false
             };
-            if (!messages.value[selectedChatUser.value.id]) {
-                messages.value[selectedChatUser.value.id] = [];
-            }
+            if (!messages.value[selectedChatUser.value.id]) messages.value[selectedChatUser.value.id] = [];
             messages.value[selectedChatUser.value.id].push(msg);
             saveAll();
             nextTick(() => scrollToBottom());
         };
-
         const toggleRecording = async () => {
             if (!isRecording.value) {
                 try {
                     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
                     mediaRecorder.value = new MediaRecorder(stream);
                     audioChunks.value = [];
-                    mediaRecorder.value.ondataavailable = (event) => {
-                        audioChunks.value.push(event.data);
-                    };
+                    mediaRecorder.value.ondataavailable = (event) => audioChunks.value.push(event.data);
                     mediaRecorder.value.onstop = () => {
                         const audioBlob = new Blob(audioChunks.value, { type: 'audio/webm' });
                         const reader = new FileReader();
-                        reader.onload = () => {
-                            sendAudioMessage(reader.result);
-                        };
+                        reader.onload = () => sendAudioMessage(reader.result);
                         reader.readAsDataURL(audioBlob);
                     };
                     mediaRecorder.value.start();
@@ -2266,34 +2087,17 @@ const app = createApp({
                 mediaRecorder.value.stream.getTracks().forEach(track => track.stop());
             }
         };
-
         const startTyping = () => {
             if (selectedChatUser.value) {
                 typingStatus.value[selectedChatUser.value.id] = true;
-                setTimeout(() => {
-                    if (selectedChatUser.value) {
-                        typingStatus.value[selectedChatUser.value.id] = false;
-                    }
-                }, 3000);
+                setTimeout(() => { if (selectedChatUser.value) typingStatus.value[selectedChatUser.value.id] = false; }, 3000);
             }
         };
-
-        const stopTyping = () => {
-            if (selectedChatUser.value) {
-                typingStatus.value[selectedChatUser.value.id] = false;
-            }
-        };
-
-        const isTyping = (userId) => {
-            return typingStatus.value[userId] || false;
-        };
-
+        const stopTyping = () => { if (selectedChatUser.value) typingStatus.value[selectedChatUser.value.id] = false; };
+        const isTyping = (userId) => typingStatus.value[userId] || false;
         const scrollToBottom = () => {
-            if (chatMessagesRef.value) {
-                chatMessagesRef.value.scrollTop = chatMessagesRef.value.scrollHeight;
-            }
+            if (chatMessagesRef.value) chatMessagesRef.value.scrollTop = chatMessagesRef.value.scrollHeight;
         };
-
         const formatTime = (dateStr) => {
             const date = new Date(dateStr);
             return date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
@@ -2302,6 +2106,7 @@ const app = createApp({
         // ============================================================
         // NOTIFICATIONS
         // ============================================================
+        const notificationId = ref(0);
         const addNotification = (userId, icon, text, type, link = null) => {
             if (userId === currentUser.value?.id) return;
             notificationId.value++;
@@ -2317,16 +2122,117 @@ const app = createApp({
             });
             saveAll();
         };
-
         const markNotifRead = (id) => {
             const notif = notifications.value.find(n => n.id === id);
             if (notif) notif.read = true;
             saveAll();
         };
-
         const markAllRead = () => {
             notifications.value.forEach(n => n.read = true);
             saveAll();
+        };
+
+        // ============================================================
+        // FIREBASE - SAUVEGARDE / CHARGEMENT / ÉCOUTE
+        // ============================================================
+        let isUpdating = false;
+        let lastDataSnapshot = null;
+
+        const saveAll = async () => {
+            if (!window.db || isUpdating) return;
+            isUpdating = true;
+            try {
+                await db.doc(STATE_PATH).set({
+                    users: users.value,
+                    animes: animes.value,
+                    proposals: proposals.value,
+                    watchedByUser: { [currentUser.value?.id]: watchedList.value },
+                    toWatchByUser: { [currentUser.value?.id]: toWatchList.value },
+                    customListsByUser: { [currentUser.value?.id]: customLists.value },
+                    recommendations: recommendations.value,
+                    followers: followers.value,
+                    messages: messages.value,
+                    notifications: notifications.value,
+                    adminCode: currentAdminCode.value,
+                    adminLoginCounter: adminLoginCounter.value,
+                    userThemes: { [currentUser.value?.id]: darkMode.value }
+                });
+            } catch (e) {
+                console.error("Erreur sauvegarde Firebase :", e);
+            }
+            isUpdating = false;
+        };
+
+        const loadAll = async () => {
+            if (!window.db) return false;
+            try {
+                const doc = await db.doc(STATE_PATH).get();
+                if (doc.exists) {
+                    const data = doc.data();
+                    users.value = data.users || [];
+                    animes.value = data.animes || [];
+                    proposals.value = data.proposals || [];
+                    recommendations.value = data.recommendations || {};
+                    followers.value = data.followers || {};
+                    messages.value = data.messages || {};
+                    notifications.value = data.notifications || [];
+                    if (data.adminCode) currentAdminCode.value = data.adminCode;
+                    if (data.adminLoginCounter) adminLoginCounter.value = data.adminLoginCounter;
+                    if (currentUser.value) {
+                        const uid = currentUser.value.id;
+                        if (data.watchedByUser && data.watchedByUser[uid]) watchedList.value = data.watchedByUser[uid];
+                        if (data.toWatchByUser && data.toWatchByUser[uid]) toWatchList.value = data.toWatchByUser[uid];
+                        if (data.customListsByUser && data.customListsByUser[uid]) customLists.value = data.customListsByUser[uid];
+                        if (data.userThemes && data.userThemes[uid] !== undefined) {
+                            darkMode.value = data.userThemes[uid];
+                            document.body.classList.toggle('light', !darkMode.value);
+                        }
+                    }
+                    return true;
+                }
+            } catch (e) {
+                console.error("Erreur chargement Firebase :", e);
+            }
+            return false;
+        };
+
+        let unsubFirebase = null;
+        const listenState = () => {
+            if (!window.db) return;
+            if (unsubFirebase) unsubFirebase();
+            unsubFirebase = db.doc(STATE_PATH).onSnapshot((doc) => {
+                if (doc.exists && !isUpdating) {
+                    const data = doc.data();
+                    const newData = JSON.stringify(data);
+                    if (newData === lastDataSnapshot) return;
+                    lastDataSnapshot = newData;
+                    
+                    users.value = data.users || [];
+                    animes.value = data.animes || [];
+                    proposals.value = data.proposals || [];
+                    recommendations.value = data.recommendations || {};
+                    followers.value = data.followers || {};
+                    messages.value = data.messages || {};
+                    notifications.value = data.notifications || [];
+                    if (data.adminCode) currentAdminCode.value = data.adminCode;
+                    if (data.adminLoginCounter) adminLoginCounter.value = data.adminLoginCounter;
+                    
+                    if (currentUser.value) {
+                        const uid = currentUser.value.id;
+                        if (data.watchedByUser && data.watchedByUser[uid]) watchedList.value = data.watchedByUser[uid];
+                        if (data.toWatchByUser && data.toWatchByUser[uid]) toWatchList.value = data.toWatchByUser[uid];
+                        if (data.customListsByUser && data.customListsByUser[uid]) customLists.value = data.customListsByUser[uid];
+                        if (data.userThemes && data.userThemes[uid] !== undefined) {
+                            darkMode.value = data.userThemes[uid];
+                            document.body.classList.toggle('light', !darkMode.value);
+                        }
+                        updateFriends();
+                        updateOnlineStatus();
+                    }
+                }
+            }, (error) => {
+                console.error("Erreur écoute Firebase :", error);
+            });
         };
 
         // ============================================================
@@ -2361,12 +2267,10 @@ const app = createApp({
         const handleLogin = () => {
             loginError.value = '';
             loginSuccess.value = '';
-            
             if (!loginUsername.value.trim() || !loginPassword.value) {
                 loginError.value = 'Veuillez remplir tous les champs';
                 return;
             }
-            
             const user = users.value.find(u => u.username.toLowerCase() === loginUsername.value.trim().toLowerCase());
             if (!user) {
                 loginError.value = 'Nom d\'utilisateur incorrect ou vous n\'avez pas de compte';
@@ -2376,18 +2280,13 @@ const app = createApp({
                 loginError.value = 'Mot de passe incorrect';
                 return;
             }
-            
-            //  Gestion du mot de passe admin
             if (user.role === 'admin') {
-                // Si on a atteint le seuil de 20 utilisateurs (hors guest)
-                const realUsers = users.value.filter(u => u.role !== 'guest' && u.id !== 'guest_');
+                const realUsers = users.value.filter(u => u.role !== 'guest' && !u.id.startsWith('guest_'));
                 if (realUsers.length >= USER_THRESHOLD) {
                     adminLoginCounter.value++;
                     if (adminLoginCounter.value >= 1) {
-                        // Changer le mot de passe admin à chaque connexion admin après le seuil
                         const newCode = generateRandomCode();
                         currentAdminCode.value = newCode;
-                        // Mettre à jour le mot de passe de TOUS les admins
                         users.value.forEach(u => {
                             if (u.role === 'admin') {
                                 u.password = 'admin' + newCode;
@@ -2399,9 +2298,9 @@ const app = createApp({
                     }
                 }
             }
-            
             currentUser.value = user;
             loginSuccess.value = 'Connexion réussie !';
+            loadPrivateData(user.id);
             saveAll();
             updateFriends();
             updateOnlineStatus();
@@ -2413,38 +2312,31 @@ const app = createApp({
             }, 500);
         };
 
+        const loadPrivateData = (uid) => {
+            // Les données privées sont déjà chargées dans loadAll et listenState
+        };
+
         const handleRegister = () => {
             registerError.value = '';
             registerSuccess.value = '';
-            
             if (!registerDisplayName.value.trim()) {
                 registerError.value = 'Nom d\'affichage obligatoire';
                 return;
             }
-            if (!registerPassword.value) {
-                registerError.value = 'Mot de passe obligatoire';
+            if (!registerPassword.value || registerPassword.value.length < 8) {
+                registerError.value = 'Mot de passe (min 8 caractères)';
                 return;
             }
-            if (registerPassword.value.length < 8) {
-                registerError.value = 'Votre mot de passe doit contenir au moins 8 caractères';
-                return;
-            }
-            
             let username = registerUsername.value.trim();
-            if (!username) {
-                username = registerDisplayName.value.trim().toLowerCase().replace(/\s+/g, '_');
-            } else {
-                username = username.toLowerCase().replace(/\s+/g, '_');
-            }
-            
-            let baseUsername = username;
+            if (!username) username = registerDisplayName.value.trim().toLowerCase().replace(/\s+/g, '_');
+            else username = username.toLowerCase().replace(/\s+/g, '_');
+            let base = username;
             let counter = 1;
             while (users.value.some(u => u.username === username)) {
                 const random = Math.random().toString(36).slice(2, 5);
-                username = baseUsername + '-' + counter + random;
+                username = base + '-' + counter + random;
                 counter++;
             }
-            
             const newUser = {
                 id: 'user_' + Date.now(),
                 username: username,
@@ -2456,11 +2348,9 @@ const app = createApp({
                 watchedCount: 0,
                 isSemiAdmin: false
             };
-            
             users.value.push(newUser);
             registerSuccess.value = 'Inscription réussie !';
             saveAll();
-            
             setTimeout(() => {
                 currentPage.value = 'admin-code';
                 registerDisplayName.value = '';
@@ -2482,7 +2372,6 @@ const app = createApp({
                         found.role = 'admin';
                         currentUser.value = found;
                         currentAdminCode.value = generateRandomCode();
-                        // Mettre à jour le mot de passe de l'admin avec le nouveau code
                         found.password = 'admin' + currentAdminCode.value;
                         saveAll();
                         localStorage.removeItem('temp_user');
@@ -2534,6 +2423,7 @@ const app = createApp({
             modalTitle.value = ' Déconnexion';
             modalMessage.value = 'Voulez-vous vraiment vous déconnecter ?';
             modalAction.value = () => {
+                saveAll();
                 currentUser.value = null;
                 localStorage.removeItem('skaymog_session');
                 currentPage.value = 'landing';
@@ -2545,7 +2435,6 @@ const app = createApp({
                 showModal.value = false;
             };
         };
-
         const logoutGuest = () => {
             currentUser.value = null;
             localStorage.removeItem('skaymog_session');
@@ -2568,7 +2457,6 @@ const app = createApp({
             selectedChatUser.value = null;
             window.scrollTo({ top: 0, behavior: 'smooth' });
         };
-
         const goLists = () => {
             currentPage.value = 'home';
             currentTab.value = 'lists';
@@ -2576,25 +2464,21 @@ const app = createApp({
             showAddToList.value = false;
             window.scrollTo({ top: 0, behavior: 'smooth' });
         };
-
         const goProposals = () => {
             currentPage.value = 'home';
             currentTab.value = 'proposals';
             selectedAnime.value = null;
             window.scrollTo({ top: 0, behavior: 'smooth' });
         };
-
         const goMessages = () => {
             currentPage.value = 'messages';
             selectedChatUser.value = null;
             window.scrollTo({ top: 0, behavior: 'smooth' });
         };
-
         const goNotifications = () => {
             currentPage.value = 'notifications';
             window.scrollTo({ top: 0, behavior: 'smooth' });
         };
-
         const goToDetail = (id) => {
             const anime = allAnimes.value.find(a => a.id === id);
             if (anime) {
@@ -2603,13 +2487,11 @@ const app = createApp({
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             }
         };
-
         const goBackFromDetail = () => {
             currentPage.value = 'home';
             selectedAnime.value = null;
             window.scrollTo({ top: 0, behavior: 'smooth' });
         };
-
         const goToMyProfile = () => {
             if (currentUser.value && currentUser.value.role !== 'guest') {
                 currentPage.value = 'my-profile';
@@ -2620,7 +2502,6 @@ const app = createApp({
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             }
         };
-
         const goToUserPage = (userId) => {
             const user = users.value.find(u => u.id === userId);
             if (user) {
@@ -2631,26 +2512,22 @@ const app = createApp({
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             }
         };
-
         const goBackFromUserPage = () => {
             currentPage.value = 'home';
             currentTab.value = 'users';
             viewedUser.value = null;
             window.scrollTo({ top: 0, behavior: 'smooth' });
         };
-
         const goToAdminPage = () => {
             currentPage.value = 'admin-page';
             window.scrollTo({ top: 0, behavior: 'smooth' });
         };
-
         const viewMyWatched = () => {
             selectedList.value = 'watched';
             currentPage.value = 'home';
             currentTab.value = 'lists';
             window.scrollTo({ top: 0, behavior: 'smooth' });
         };
-
         const viewMyPublished = () => {
             viewedUser.value = currentUser.value;
             currentPage.value = 'user-page';
@@ -2658,12 +2535,10 @@ const app = createApp({
             showUserWatched.value = false;
             window.scrollTo({ top: 0, behavior: 'smooth' });
         };
-
         const viewUserWatched = () => {
             showUserWatched.value = !showUserWatched.value;
             showUserPublished.value = false;
         };
-
         const viewUserPublished = () => {
             showUserPublished.value = !showUserPublished.value;
             showUserWatched.value = false;
@@ -2679,7 +2554,7 @@ const app = createApp({
         };
 
         // ============================================================
-        // ANIME CRUD
+        // ANIME CRUD (PUBLIC)
         // ============================================================
         const addAnime = (anime) => {
             const maxId = Math.max(0, ...animes.value.map(a => a.id), ...proposals.value.map(p => p.id));
@@ -2703,7 +2578,6 @@ const app = createApp({
             saveAll();
             return newAnime;
         };
-
         const updateAnime = (id, data) => {
             let found = animes.value.find(a => a.id === id);
             if (found) {
@@ -2722,7 +2596,6 @@ const app = createApp({
             }
             return null;
         };
-
         const deleteAnime = (id) => {
             watchedList.value = watchedList.value.filter(i => i !== id);
             toWatchList.value = toWatchList.value.filter(i => i !== id);
@@ -2737,7 +2610,6 @@ const app = createApp({
                 selectedAnime.value = null;
             }
         };
-
         const toggleLike = (id) => {
             if (!currentUser.value || currentUser.value.role === 'guest') {
                 alert('Connectez-vous pour liker !');
@@ -2757,9 +2629,19 @@ const app = createApp({
                 selectedAnime.value = {...anime};
             }
         };
+        const toggleFinished = (id) => {
+            let anime = allAnimes.value.find(a => a.id === id);
+            if (anime) {
+                anime.finished = !anime.finished;
+                if (selectedAnime.value && selectedAnime.value.id === id) {
+                    selectedAnime.value = {...anime};
+                }
+                saveAll();
+            }
+        };
 
         // ============================================================
-        // WATCHED / LISTS
+        // WATCHED / LISTS (PERSONNEL)
         // ============================================================
         const toggleWatched = (id) => {
             if (!currentUser.value || currentUser.value.role === 'guest') {
@@ -2771,17 +2653,12 @@ const app = createApp({
                 watchedList.value.splice(idx, 1);
             } else {
                 watchedList.value.push(id);
-                const user = users.value.find(u => u.id === currentUser.value.id);
-                if (user) {
-                    user.watchedCount = watchedList.value.length;
-                }
             }
             if (selectedAnime.value && selectedAnime.value.id === id) {
                 selectedAnime.value = {...selectedAnime.value};
             }
             saveAll();
         };
-
         const addToWatchList = (id) => {
             if (!currentUser.value || currentUser.value.role === 'guest') {
                 alert('Connectez-vous pour ajouter à la liste !');
@@ -2795,7 +2672,6 @@ const app = createApp({
                 alert('Déjà dans la liste "À voir"');
             }
         };
-
         const removeFromList = (id) => {
             if (selectedList.value === 'watched') {
                 const idx = watchedList.value.indexOf(id);
@@ -2809,10 +2685,6 @@ const app = createApp({
             }
             saveAll();
         };
-
-        // ============================================================
-        // CUSTOM LISTS
-        // ============================================================
         const createList = () => {
             if (!newListName.value.trim()) {
                 alert('Veuillez entrer un nom de liste');
@@ -2833,7 +2705,6 @@ const app = createApp({
             selectedList.value = name;
             saveAll();
         };
-
         const deleteList = (name) => {
             if (['watched', 'liked', 'toWatch'].includes(name)) {
                 alert('Vous ne pouvez pas supprimer les listes prédéfinies');
@@ -2847,7 +2718,6 @@ const app = createApp({
                 saveAll();
             }
         };
-
         const addToCustomList = (id, listName) => {
             if (!customLists.value[listName]) return;
             if (!customLists.value[listName].includes(id)) {
@@ -2860,34 +2730,24 @@ const app = createApp({
         };
 
         // ============================================================
-        // RECOMMENDATIONS
+        // RECOMMANDATIONS (PUBLIC)
         // ============================================================
         const isRecommended = (animeId) => {
             if (!currentUser.value) return false;
             return recommendations.value[animeId] && recommendations.value[animeId].includes(currentUser.value.id);
         };
-
-        const getRecommendCount = (animeId) => {
-            return (recommendations.value[animeId] || []).length;
-        };
-
+        const getRecommendCount = (animeId) => (recommendations.value[animeId] || []).length;
         const toggleRecommend = (animeId) => {
             if (!currentUser.value || currentUser.value.role === 'guest') {
                 alert('Connectez-vous pour recommander !');
                 return;
             }
-            if (!recommendations.value[animeId]) {
-                recommendations.value[animeId] = [];
-            }
+            if (!recommendations.value[animeId]) recommendations.value[animeId] = [];
             const idx = recommendations.value[animeId].indexOf(currentUser.value.id);
-            if (idx > -1) {
-                recommendations.value[animeId].splice(idx, 1);
-            } else {
-                recommendations.value[animeId].push(currentUser.value.id);
-            }
+            if (idx > -1) recommendations.value[animeId].splice(idx, 1);
+            else recommendations.value[animeId].push(currentUser.value.id);
             saveAll();
         };
-
         const getUserRecommendations = (userId) => {
             const recs = [];
             for (const [animeId, users] of Object.entries(recommendations.value)) {
@@ -2900,17 +2760,8 @@ const app = createApp({
         };
 
         // ============================================================
-        // FOLLOW SYSTEM
+        // FOLLOW (PUBLIC)
         // ============================================================
-        const isFollowing = (userId) => {
-            if (!currentUser.value) return false;
-            return followers.value[userId] && followers.value[userId].includes(currentUser.value.id);
-        };
-
-        const getFollowersCount = (userId) => {
-            return (followers.value[userId] || []).length;
-        };
-
         const toggleFollow = (userId) => {
             if (!currentUser.value || currentUser.value.role === 'guest') {
                 alert('Connectez-vous pour suivre !');
@@ -2920,9 +2771,7 @@ const app = createApp({
                 alert('Vous ne pouvez pas vous suivre vous-même');
                 return;
             }
-            if (!followers.value[userId]) {
-                followers.value[userId] = [];
-            }
+            if (!followers.value[userId]) followers.value[userId] = [];
             const idx = followers.value[userId].indexOf(currentUser.value.id);
             if (idx > -1) {
                 followers.value[userId].splice(idx, 1);
@@ -2935,7 +2784,7 @@ const app = createApp({
         };
 
         // ============================================================
-        // COMMENTS
+        // COMMENTAIRES (PUBLICS, suppression par auteur ou admin)
         // ============================================================
         const addComment = (animeId) => {
             if (!newComment.value.trim()) return;
@@ -2949,7 +2798,8 @@ const app = createApp({
             const comment = {
                 userId: currentUser.value.id,
                 text: newComment.value.trim(),
-                date: new Date().toISOString()
+                date: new Date().toISOString(),
+                id: Date.now()
             };
             anime.comments.push(comment);
             newComment.value = '';
@@ -2961,14 +2811,28 @@ const app = createApp({
                 addNotification(anime.proposedBy, 'fa-comment', `<strong>${currentUser.value.displayName || currentUser.value.username}</strong> a commenté sur <strong>${anime.title}</strong>`, 'comment_reply');
             }
         };
-
+        const deleteComment = (animeId, commentIndex) => {
+            let anime = allAnimes.value.find(a => a.id === animeId);
+            if (!anime) return;
+            const comment = anime.comments[commentIndex];
+            if (!comment) return;
+            if (comment.userId !== currentUser.value.id && currentUser.value.role !== 'admin') {
+                alert('Vous ne pouvez pas supprimer ce commentaire');
+                return;
+            }
+            anime.comments.splice(commentIndex, 1);
+            if (selectedAnime.value && selectedAnime.value.id === animeId) {
+                selectedAnime.value = {...anime};
+            }
+            saveAll();
+        };
         const formatDate = (dateStr) => {
             const date = new Date(dateStr);
             return date.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' });
         };
 
         // ============================================================
-        // ADMIN CODE (génération manuelle)
+        // ADMIN CODE MANAGEMENT
         // ============================================================
         const generateNewAdminCode = () => {
             showModal.value = true;
@@ -2976,27 +2840,17 @@ const app = createApp({
             modalMessage.value = 'Voulez-vous vraiment générer un nouveau code admin ? L\'ancien code ne fonctionnera plus.';
             modalAction.value = () => {
                 currentAdminCode.value = generateRandomCode();
-                // Mettre à jour le mot de passe de tous les admins
-                users.value.forEach(u => {
-                    if (u.role === 'admin') {
-                        u.password = 'admin' + currentAdminCode.value;
-                    }
-                });
+                users.value.forEach(u => { if (u.role === 'admin') u.password = 'admin' + currentAdminCode.value; });
                 saveAll();
                 alert('Nouveau code admin généré : ' + getFullAdminCode());
                 showModal.value = false;
             };
         };
-
         const setCustomAdminCode = () => {
             if (!customAdminCode.value.trim()) return;
             const code = customAdminCode.value.trim().toUpperCase();
-            if (code.length !== 5) {
-                alert('Le code doit faire 5 lettres');
-                return;
-            }
-            if (!/^[A-Z]{5}$/.test(code)) {
-                alert('Le code doit contenir uniquement des lettres majuscules');
+            if (code.length !== 5 || !/^[A-Z]{5}$/.test(code)) {
+                alert('Le code doit faire 5 lettres majuscules');
                 return;
             }
             showModal.value = true;
@@ -3004,11 +2858,7 @@ const app = createApp({
             modalMessage.value = `Voulez-vous vraiment définir le nouveau code admin : ${code} ?`;
             modalAction.value = () => {
                 currentAdminCode.value = code;
-                users.value.forEach(u => {
-                    if (u.role === 'admin') {
-                        u.password = 'admin' + code;
-                    }
-                });
+                users.value.forEach(u => { if (u.role === 'admin') u.password = 'admin' + code; });
                 customAdminCode.value = '';
                 saveAll();
                 alert('Nouveau code admin défini : ' + getFullAdminCode());
@@ -3059,10 +2909,7 @@ const app = createApp({
         // ADMIN PANEL
         // ============================================================
         const adminSubmit = () => {
-            if (!adminForm.value.title.trim()) {
-                alert('Titre obligatoire');
-                return;
-            }
+            if (!adminForm.value.title.trim()) { alert('Titre obligatoire'); return; }
             const data = {
                 title: adminForm.value.title.trim(),
                 ep: adminForm.value.ep || 0,
@@ -3087,7 +2934,6 @@ const app = createApp({
             adminForm.value = { title:'', ep:0, saison:1, films:0, studio:'', category:'', thumb:'', summary:'', status:'published', editId:null };
             saveAll();
         };
-
         const editAnime = (anime) => {
             adminForm.value = {
                 title: anime.title,
@@ -3104,12 +2950,10 @@ const app = createApp({
             currentPage.value = 'admin-page';
             window.scrollTo({ top: 0, behavior: 'smooth' });
         };
-
         const editAnimeFromDetail = () => {
             if (!selectedAnime.value) return;
             editAnime(selectedAnime.value);
         };
-
         const confirmDeleteAnime = (id) => {
             showModal.value = true;
             modalTitle.value = ' Supprimer l\'animé';
@@ -3117,28 +2961,10 @@ const app = createApp({
             modalAction.value = () => {
                 deleteAnime(id);
                 showModal.value = false;
-                if (selectedAnime.value && selectedAnime.value.id === id) {
-                    selectedAnime.value = null;
-                }
+                if (selectedAnime.value && selectedAnime.value.id === id) selectedAnime.value = null;
             };
         };
-
-        const toggleFinished = (id) => {
-            let anime = allAnimes.value.find(a => a.id === id);
-            if (anime) {
-                anime.finished = !anime.finished;
-                if (selectedAnime.value && selectedAnime.value.id === id) {
-                    selectedAnime.value = {...anime};
-                }
-                saveAll();
-            }
-        };
-
-        const modalConfirm = () => {
-            if (modalAction.value) {
-                modalAction.value();
-            }
-        };
+        const modalConfirm = () => { if (modalAction.value) modalAction.value(); };
 
         // ============================================================
         // PROPOSALS
@@ -3148,10 +2974,7 @@ const app = createApp({
                 alert('Connectez-vous pour proposer un animé !');
                 return;
             }
-            if (!proposalForm.value.title.trim()) {
-                alert('Titre obligatoire');
-                return;
-            }
+            if (!proposalForm.value.title.trim()) { alert('Titre obligatoire'); return; }
             const newProposal = {
                 title: proposalForm.value.title.trim(),
                 ep: proposalForm.value.ep || 0,
@@ -3181,22 +3004,16 @@ const app = createApp({
             const file = e.target.files[0];
             if (!file) return;
             const reader = new FileReader();
-            reader.onload = (ev) => {
-                adminForm.value.thumb = ev.target.result;
-            };
+            reader.onload = (ev) => { adminForm.value.thumb = ev.target.result; };
             reader.readAsDataURL(file);
         };
-
         const handleProposalImage = (e) => {
             const file = e.target.files[0];
             if (!file) return;
             const reader = new FileReader();
-            reader.onload = (ev) => {
-                proposalForm.value.thumb = ev.target.result;
-            };
+            reader.onload = (ev) => { proposalForm.value.thumb = ev.target.result; };
             reader.readAsDataURL(file);
         };
-
         const handleAvatarImage = (e) => {
             const file = e.target.files[0];
             if (!file) return;
@@ -3212,7 +3029,7 @@ const app = createApp({
         };
 
         // ============================================================
-        // PROFILE
+        // PROFILE UPDATE
         // ============================================================
         const doUpdateProfile = () => {
             if (!currentUser.value) return;
@@ -3234,7 +3051,6 @@ const app = createApp({
             currentPage.value = 'home';
             currentTab.value = 'home';
         };
-
         const updateProfile = () => {
             if (!currentUser.value) return;
             if (profileForm.value.password && profileForm.value.password.length >= 8 && profileForm.value.password !== currentUser.value.password) {
@@ -3253,7 +3069,7 @@ const app = createApp({
         // ============================================================
         // WATCHERS
         // ============================================================
-        watch([animes, proposals, users, watchedList, toWatchList, customLists, recommendations, followers, friends, messages, notifications, currentAdminCode, adminLoginCounter], () => {
+        watch([animes, proposals, users, watchedList, toWatchList, customLists, recommendations, followers, friends, messages, notifications, currentAdminCode, adminLoginCounter, darkMode], () => {
             saveAll();
         }, { deep: true });
 
@@ -3261,36 +3077,32 @@ const app = createApp({
         // INIT
         // ============================================================
         onMounted(async () => {
-            await loadAll();
+            const hasData = await loadAll();
             createDefaultAdmin();
             listenState();
-            
-            const theme = localStorage.getItem('skaymog_theme');
-            if (theme === 'light') {
-                darkMode.value = false;
-                document.body.classList.remove('light');
-            } else {
-                darkMode.value = true;
-                document.body.classList.add('light');
+
+            const savedTheme = localStorage.getItem('skaymog_theme');
+            if (savedTheme) {
+                darkMode.value = savedTheme === 'dark';
+                document.body.classList.toggle('light', !darkMode.value);
             }
-            
+
             const session = localStorage.getItem('skaymog_session');
             if (session) {
                 try {
                     const data = JSON.parse(session);
-                    currentUser.value = data.user;
-                    const exists = users.value.some(u => u.id === data.user.id);
-                    if (!exists && data.user.role !== 'guest') {
-                        currentUser.value = null;
-                        localStorage.removeItem('skaymog_session');
-                        currentPage.value = 'landing';
-                    } else {
+                    const user = users.value.find(u => u.id === data.user.id);
+                    if (user) {
+                        currentUser.value = user;
+                        await loadPrivateData(user.id);
                         currentPage.value = 'home';
                         currentTab.value = 'home';
                         updateFriends();
                         updateOnlineStatus();
+                    } else {
+                        currentPage.value = 'landing';
                     }
-                } catch(e) {
+                } catch (e) {
                     currentPage.value = 'landing';
                 }
             } else {
@@ -3318,8 +3130,7 @@ const app = createApp({
             categories, newComment, showModal, modalTitle, modalMessage, modalAction, modalData,
             allAnimes, homeAnimes, homeTotalPages, paginatedHome,
             paginatedProposals, filteredUsers, categoryStats,
-            watchedCount, likedCount, toWatchCount, currentListItems,
-            userPublishedAnimes, chatUsers,
+            likedCount, currentListItems, userPublishedAnimes, chatUsers,
             getUserName, getAnime, isWatched,
             getUserWatchedCount, getUserPublishedCount, getFullAdminCode,
             isFriend, getMyFriendsCount,
@@ -3339,7 +3150,7 @@ const app = createApp({
             createList, deleteList, addToCustomList,
             isRecommended, getRecommendCount, toggleRecommend, getUserRecommendations,
             isFollowing, getFollowersCount, toggleFollow,
-            addComment, formatDate,
+            addComment, deleteComment, formatDate,
             generateNewAdminCode, setCustomAdminCode, toggleAdminMode,
             adminSubmit, editAnime, editAnimeFromDetail, confirmDeleteAnime, toggleFinished,
             submitProposal,
