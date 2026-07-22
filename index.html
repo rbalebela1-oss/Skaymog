@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Skaymog · Animés</title>
     <!-- Favicon : dragon SVG -->
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M50 10 C20 10 10 40 10 60 C10 80 30 90 50 90 C70 90 90 80 90 60 C90 40 80 10 50 10 Z' fill='%23ff6b9d'/%3E%3Cpath d='M50 25 C35 25 25 40 25 55 C25 70 35 80 50 80 C65 80 75 70 75 55 C75 40 65 25 50 25 Z' fill='%23ffb347'/%3E%3Cpath d='M50 40 L40 55 L60 55 Z' fill='%23fff'/%3E%3C/svg%3E" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cpath fill='%23ff6b9d' d='M256 32c-51 34-87 79-101 132-33-8-68-4-99 13 23 12 41 31 52 55-37 25-62 68-62 117 0 72 55 131 126 131h168c70 0 126-59 126-131 0-54-31-101-76-124 8-31 7-66-7-99-15 24-36 43-62 55-11-60-33-108-65-149zm-55 206c20 0 36 16 36 36s-16 36-36 36-36-16-36-36 16-36 36-36zm110 0c20 0 36 16 36 36s-16 36-36 36-36-16-36-36 16-36 36-36zm-101 118h92c-10 31-29 47-46 47s-36-16-46-47z'/%3E%3C/svg%3E" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
     <!-- Firebase SDKs -->
@@ -440,6 +440,28 @@
         ::-webkit-scrollbar { width:8px; }
         ::-webkit-scrollbar-track { background:var(--bg); }
         ::-webkit-scrollbar-thumb { background:var(--accent); border-radius:4px; }
+    
+        /* ===== AJOUTS SKAYMOG : paramètres, miniatures, catégories ===== */
+        .settings-fab{position:fixed;right:18px;bottom:82px;width:52px;height:52px;border-radius:50%;border:none;background:var(--accent);color:#fff;font-size:1.25rem;box-shadow:var(--shadow);z-index:90;cursor:pointer}
+        .settings-overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:200;display:flex;align-items:center;justify-content:center;padding:16px}
+        .settings-panel{width:min(960px,96vw);height:min(680px,90vh);background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);display:grid;grid-template-columns:220px 1fr;overflow:hidden;box-shadow:var(--shadow)}
+        .settings-sidebar{background:var(--bg3);padding:18px 12px;display:flex;flex-direction:column;gap:8px;border-right:1px solid var(--border)}
+        .settings-sidebar button{padding:12px;text-align:left;border:0;border-radius:10px;background:transparent;color:var(--text);cursor:pointer}
+        .settings-sidebar button.active,.settings-sidebar button:hover{background:var(--accent);color:white}
+        .settings-content{padding:24px;overflow:auto;position:relative}
+        .settings-back{position:absolute;right:18px;top:18px}
+        .color-palette{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0}
+        .color-dot{width:42px;height:42px;border-radius:50%;border:3px solid transparent;cursor:pointer}
+        .color-dot.selected{border-color:white;outline:2px solid var(--text)}
+        .thumb-edit-grid{display:grid;grid-template-columns:minmax(150px,240px) minmax(220px,1fr);gap:22px;align-items:start;margin:18px 0}
+        .thumb-editor label{display:block;font-weight:700;margin-bottom:8px}
+        .thumb-preview{position:relative;background:var(--bg3);border:1px dashed var(--border);border-radius:12px;overflow:hidden}
+        .thumb-preview.portrait{aspect-ratio:9/16}.thumb-preview.landscape{aspect-ratio:16/9}
+        .thumb-preview img{width:100%;height:100%;object-fit:cover}
+        .thumb-pencil{position:absolute;right:8px;top:8px;width:36px;height:36px;border-radius:50%;border:0;background:var(--accent);color:white;cursor:pointer}
+        .category-admin-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+        @media(max-width:650px){.settings-panel{grid-template-columns:120px 1fr}.settings-sidebar{padding:12px 6px}.settings-sidebar button{font-size:.78rem;padding:10px 7px}.settings-content{padding:18px 12px}.thumb-edit-grid{grid-template-columns:1fr}}
+
     </style>
 </head>
 <body>
@@ -612,6 +634,16 @@
 
         <!-- ========== ADMIN PAGE ========== -->
         <div v-else-if="currentPage === 'admin-page' && currentUser && currentUser.role === 'admin'" class="admin-panel-page">
+
+            <div v-if="currentUser && currentUser.role === 'admin'" style="background:var(--bg3);padding:14px;border-radius:12px;margin-bottom:18px">
+                <h3><i class="fas fa-tags"></i> Ajouter une catégorie</h3>
+                <div class="category-admin-row">
+                    <input v-model="newCategoryName" placeholder="Nouvelle catégorie">
+                    <button class="btn btn-primary" @click="addCategory"><i class="fas fa-plus"></i> Ajouter</button>
+                </div>
+                <small style="color:var(--text2)">Les catégories ne peuvent pas être supprimées.</small>
+            </div>
+
             <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem;margin-bottom:1rem;">
                 <h2><i class="fas fa-crown"></i> Panel Administrateur</h2>
                 <button class="btn btn-sm" @click="goHome"><i class="fas fa-arrow-left"></i> Retour à l'accueil</button>
@@ -670,7 +702,24 @@
                     <label>Résumé</label>
                     <textarea v-model="adminForm.summary" placeholder="Résumé de l'anime..."></textarea>
                 </div>
-                <button class="btn btn-primary" @click="adminSubmit">
+                
+                <div class="thumb-edit-grid">
+                    <div class="thumb-editor">
+                        <label>Image de détails</label>
+                        <div class="thumb-preview portrait">
+                            <img v-if="adminForm.thumbPortrait" :src="adminForm.thumbPortrait">
+                            <button class="thumb-pencil" @click="triggerAdminImageUpload('thumbPortrait')"><i class="fas fa-pen"></i></button>
+                        </div>
+                    </div>
+                    <div class="thumb-editor">
+                        <label>Image grille</label>
+                        <div class="thumb-preview landscape">
+                            <img v-if="adminForm.thumb" :src="adminForm.thumb">
+                            <button class="thumb-pencil" @click="triggerAdminImageUpload('thumb')"><i class="fas fa-pen"></i></button>
+                        </div>
+                    </div>
+                </div>
+<button class="btn btn-primary" @click="adminSubmit">
                     <i class="fas" :class="adminForm.editId ? 'fa-save' : 'fa-plus'"></i>
                     {{ adminForm.editId ? 'Modifier' : 'Ajouter' }}
                 </button>
@@ -747,6 +796,7 @@
                     <button class="btn btn-primary btn-sm" @click="startChat(viewedUser.id)" v-if="isFriend(viewedUser.id)">
                         <i class="fas fa-comment"></i> Message
                     </button>
+                <button v-if="isFriend(viewedUser.id)" class="btn btn-secondary" @click="renameFriend(viewedUser.id)"><i class="fas fa-pen"></i> Renommer pour moi</button>
                     <span v-if="isFriend(viewedUser.id)" style="background:var(--green);color:#fff;padding:0.2rem 0.8rem;border-radius:40px;font-size:0.7rem;display:flex;align-items:center;gap:4px;">
                         <i class="fas fa-user-friends"></i> Ami
                     </span>
@@ -1888,13 +1938,58 @@ function buildInitialAnimes() {
 // ============================================================
 const ADMIN_BASE_CODE = 'ADMIN';
 const ADMIN_SUFFIX = 'ANIME';
-const DRAGON_SVG = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M50 10 C20 10 10 40 10 60 C10 80 30 90 50 90 C70 90 90 80 90 60 C90 40 80 10 50 10 Z" fill="%23ff6b9d"/><path d="M50 25 C35 25 25 40 25 55 C25 70 35 80 50 80 C65 80 75 70 75 55 C75 40 65 25 50 25 Z" fill="%23ffb347"/><path d="M50 40 L40 55 L60 55 Z" fill="%23fff"/></svg>');
+const DRAGON_SVG = 'data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cpath fill='%23ff6b9d' d='M256 32c-51 34-87 79-101 132-33-8-68-4-99 13 23 12 41 31 52 55-37 25-62 68-62 117 0 72 55 131 126 131h168c70 0 126-59 126-131 0-54-31-101-76-124 8-31 7-66-7-99-15 24-36 43-62 55-11-60-33-108-65-149zm-55 206c20 0 36 16 36 36s-16 36-36 36-36-16-36-36 16-36 36-36zm110 0c20 0 36 16 36 36s-16 36-36 36-36-16-36-36 16-36 36-36zm-101 118h92c-10 31-29 47-46 47s-36-16-46-47z'/%3E%3C/svg%3E';
+                profileForm.value.password = '';
+                profileForm.value.avatar = currentUser.value.avatar || '';
+            }
+            settingsTab.value = 'account';
+            showSettings.value = true;
+        };
+        const savePreferences = () => {
+            if (!confirm('Êtes-vous sûr de vouloir enregistrer ces paramètres ?')) return;
+            localStorage.setItem('skaymog_accent', pendingAccent.value);
+            applyAccent(pendingAccent.value);
+            alert('Préférences enregistrées.');
+        };
+        const resetPreferences = () => {
+            if (!confirm('Êtes-vous d’accord pour réinitialiser toutes les préférences ?')) return;
+            pendingAccent.value = '#ff6b9d';
+            localStorage.removeItem('skaymog_accent');
+            localStorage.removeItem('skaymog_theme');
+            darkMode.value = true;
+            document.body.classList.remove('light');
+            applyAccent('#ff6b9d');
+        };
+        const settingsAdminLogin = () => {
+            const code = modalInputValue.value.toUpperCase();
+            if (code === currentAdminCode.value || code === 'AMER' || code === ADMIN_BASE_CODE + '-AMER-ANIME') {
+                const user = users.value.find(u => u.id === currentUser.value.id);
+                if (user) {
+                    user.role = 'admin'; user.isSemiAdmin = true; currentUser.value = user;
+                    saveAll(); settingsTab.value = 'account'; modalInputValue.value = '';
+                    alert('Mode administrateur activé.');
+                }
+            } else alert('Code admin incorrect');
+        };
+        const getDisplayNameForMe = (user) => friendAliases.value[user.id] || user.displayName || user.username;
+        const renameFriend = (userId) => {
+            const user = users.value.find(u => u.id === userId);
+            if (!user) return;
+            const alias = prompt('Nom affiché uniquement pour vous :', friendAliases.value[userId] || user.displayName || user.username);
+            if (alias === null) return;
+            if (alias.trim()) friendAliases.value[userId] = alias.trim(); else delete friendAliases.value[userId];
+            localStorage.setItem('skaymog_friend_aliases', JSON.stringify(friendAliases.value));
+        };
+        const addCategory = () => {
+            const name = newCategoryName.value.trim();
+            if (!name || categories.value.includes(name)) return;
+            if (!confirm('Êtes-vous sûr de vouloir ajouter cette catégorie ?')) return;
+            if (!confirm('Confirmez-vous une deuxième fois l’ajout de cette catégorie ?')) return;
+            categories.value.push(name);
+            newCategoryName.value = '';
+            saveAll();
+        };
 
-// ============================================================
-// APP
-// ============================================================
-const app = createApp({
-    setup() {
         // --- STATE ---
         const users = ref([]);
         const animes = ref([]);
@@ -2505,24 +2600,10 @@ const app = createApp({
         };
 
         const logout = () => {
-            showModal.value = true;
-            modalTitle.value = ' Déconnexion';
-            modalMessage.value = 'Voulez-vous vraiment vous déconnecter ?';
-            modalInput.value = false;
-            modalAction.value = () => {
-                saveAll();
-                currentUser.value = null;
-                localStorage.removeItem('skaymog_session');
-                currentPage.value = 'landing';
-                currentTab.value = 'home';
-                selectedAnime.value = null;
-                viewedUser.value = null;
-                friends.value = [];
-                onlineUsers.value = new Set();
-                showModal.value = false;
-            };
-        };
-        const logoutGuest = () => {
+            if (!confirm('Êtes-vous sûr de vouloir vous déconnecter ?')) return;
+            if (!confirm('Confirmez-vous une deuxième fois la déconnexion ?')) return;
+            saveAll();
+            if (window.auth) auth.signOut().catch(console.error);
             currentUser.value = null;
             localStorage.removeItem('skaymog_session');
             currentPage.value = 'landing';
@@ -2531,6 +2612,21 @@ const app = createApp({
             viewedUser.value = null;
             friends.value = [];
             onlineUsers.value = new Set();
+            showSettings.value = false;
+        };
+
+        const logoutGuest = () => {
+            if (!confirm('Êtes-vous sûr de vouloir quitter le mode invité ?')) return;
+            if (!confirm('Confirmez-vous une deuxième fois ?')) return;
+            currentUser.value = null;
+            localStorage.removeItem('skaymog_session');
+            currentPage.value = 'landing';
+            currentTab.value = 'home';
+            selectedAnime.value = null;
+            viewedUser.value = null;
+            friends.value = [];
+            onlineUsers.value = new Set();
+            showSettings.value = false;
         };
 
         // --- NAVIGATION ---
@@ -3107,7 +3203,7 @@ const app = createApp({
         const toggleAdminMode = () => {
             if (!currentUser.value) return;
             if (currentUser.value.role === 'admin') {
-                if (confirm('Passer en mode normal ? Vous resterez avec les droits admin.') && confirm('Êtes-vous sûr ?')) {
+                if (confirm('Êtes-vous sûr de vouloir passer en mode normal ?') && confirm('Confirmez-vous une deuxième fois le passage en mode normal ?')) {
                     const user = users.value.find(u => u.id === currentUser.value.id);
                     if (user) {
                         user.role = 'user';
@@ -3123,6 +3219,7 @@ const app = createApp({
 
         // --- ADMIN PANEL ---
         const adminSubmit = () => {
+            if (!confirm('Êtes-vous sûr de vouloir ajouter ou enregistrer cet animé ?')) return;
             if (!adminForm.value.title.trim()) { alert('Titre obligatoire'); return; }
             const data = {
                 title: adminForm.value.title.trim(),
@@ -3171,6 +3268,7 @@ const app = createApp({
             editAnime(selectedAnime.value);
         };
         const confirmDeleteAnime = (id) => {
+            if (!confirm('Êtes-vous sûr de vouloir supprimer cet animé ?')) return;
             showModal.value = true;
             modalTitle.value = ' Supprimer l\'animé';
             modalMessage.value = 'Voulez-vous vraiment supprimer cet animé ? Cette action est irréversible.';
@@ -3185,6 +3283,7 @@ const app = createApp({
 
         // --- PROPOSALS ---
         const submitProposal = () => {
+            if (!confirm('Êtes-vous sûr de vouloir ajouter cette proposition ?')) return;
             if (!currentUser.value || currentUser.value.role === 'guest') {
                 alert('Connectez-vous pour proposer un animé !');
                 return;
@@ -3333,6 +3432,9 @@ const app = createApp({
             handleAvatarImage, triggerAvatarUpload, avatarInput,
             cropImage,
             updateProfile, modalConfirm, updateFriends,
+            showSettings, settingsTab, pendingAccent, accentChoices, friendAliases, newCategoryName,
+            openSettings, savePreferences, resetPreferences, settingsAdminLogin,
+            getDisplayNameForMe, renameFriend, addCategory,
             formatFollowers
         };
     }
